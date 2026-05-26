@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/CSC478-WCU/fabric-go-fim/internal/graph"
-	"github.com/CSC478-WCU/fabric-go-fim/pkg/sliver"
+	"github.com/Testbed-IAC/fabric-go-fim/internal/graph"
+	"github.com/Testbed-IAC/fabric-go-fim/pkg/sliver"
 )
 
 var ignoredDiffProps = map[string]struct{}{

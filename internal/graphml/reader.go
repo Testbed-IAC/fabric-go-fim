@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/CSC478-WCU/fabric-go-fim/internal/graph"
-	"github.com/CSC478-WCU/fabric-go-fim/pkg/sliver"
+	"github.com/Testbed-IAC/fabric-go-fim/internal/graph"
+	"github.com/Testbed-IAC/fabric-go-fim/pkg/sliver"
 )
 
 // Read parses a GraphML document into a property graph.

@@ -1,6 +1,6 @@
 package topology
 
-import "github.com/CSC478-WCU/fabric-go-fim/pkg/sliver"
+import "github.com/Testbed-IAC/fabric-go-fim/pkg/sliver"
 
 // NodeOpts configures a call to Topology.AddNode.
 //

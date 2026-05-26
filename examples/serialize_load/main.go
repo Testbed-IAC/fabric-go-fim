@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/CSC478-WCU/fabric-go-fim/pkg/topology"
+	"github.com/Testbed-IAC/fabric-go-fim/pkg/topology"
 )
 
 func main() {

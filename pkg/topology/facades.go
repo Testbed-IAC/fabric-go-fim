@@ -3,9 +3,9 @@ package topology
 import (
 	"fmt"
 
-	"github.com/CSC478-WCU/fabric-go-fim/internal/graph"
-	"github.com/CSC478-WCU/fabric-go-fim/pkg/catalog"
-	"github.com/CSC478-WCU/fabric-go-fim/pkg/sliver"
+	"github.com/Testbed-IAC/fabric-go-fim/internal/graph"
+	"github.com/Testbed-IAC/fabric-go-fim/pkg/catalog"
+	"github.com/Testbed-IAC/fabric-go-fim/pkg/sliver"
 )
 
 // Node is a facade over a NetworkNode graph node.

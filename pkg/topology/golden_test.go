@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/CSC478-WCU/fabric-go-fim/pkg/sliver"
+	"github.com/Testbed-IAC/fabric-go-fim/pkg/sliver"
 )
 
 // fixturesDir is resolved relative to the package directory at test time.

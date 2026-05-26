@@ -3,7 +3,7 @@ package graphml
 import (
 	"reflect"
 
-	"github.com/CSC478-WCU/fabric-go-fim/internal/graph"
+	"github.com/Testbed-IAC/fabric-go-fim/internal/graph"
 )
 
 // GraphsEqual reports whether two property graphs have the same nodes and edges.

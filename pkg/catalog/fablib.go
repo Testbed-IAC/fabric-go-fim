@@ -1,6 +1,6 @@
 package catalog
 
-import "github.com/CSC478-WCU/fabric-go-fim/pkg/sliver"
+import "github.com/Testbed-IAC/fabric-go-fim/pkg/sliver"
 
 // FABlib component model name constants.
 const (

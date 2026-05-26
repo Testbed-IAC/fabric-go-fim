@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/CSC478-WCU/fabric-go-fim/pkg/sliver"
-	"github.com/CSC478-WCU/fabric-go-fim/pkg/topology"
+	"github.com/Testbed-IAC/fabric-go-fim/pkg/sliver"
+	"github.com/Testbed-IAC/fabric-go-fim/pkg/topology"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-module github.com/CSC478-WCU/fabric-go-fim
+module github.com/Testbed-IAC/fabric-go-fim
 
 go 1.24
 

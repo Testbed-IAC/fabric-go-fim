@@ -1,8 +1,8 @@
 package topology
 
 import (
-	"github.com/CSC478-WCU/fabric-go-fim/internal/graph"
-	"github.com/CSC478-WCU/fabric-go-fim/pkg/diff"
+	"github.com/Testbed-IAC/fabric-go-fim/internal/graph"
+	"github.com/Testbed-IAC/fabric-go-fim/pkg/diff"
 )
 
 // GraphDiff describes semantic drift between an expected topology graph and

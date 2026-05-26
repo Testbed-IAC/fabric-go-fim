@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/CSC478-WCU/fabric-go-fim/pkg/sliver"
+	"github.com/Testbed-IAC/fabric-go-fim/pkg/sliver"
 )
 
 // Validate checks that the instance catalog contains usable flavor names and

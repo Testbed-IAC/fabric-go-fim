@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/CSC478-WCU/fabric-go-fim/internal/graph"
+	"github.com/Testbed-IAC/fabric-go-fim/internal/graph"
 )
 
 // ---------------------------------------------------------------------------
