@@ -1,0 +1,80 @@
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d13" for="edge" attr.name="Class" attr.type="string"/>
+  <key id="d12" for="node" attr.name="Labels" attr.type="string"/>
+  <key id="d11" for="node" attr.name="Layer" attr.type="string"/>
+  <key id="d10" for="node" attr.name="Details" attr.type="string"/>
+  <key id="d9" for="node" attr.name="Model" attr.type="string"/>
+  <key id="d8" for="node" attr.name="Site" attr.type="string"/>
+  <key id="d7" for="node" attr.name="ImageRef" attr.type="string"/>
+  <key id="d6" for="node" attr.name="StitchNode" attr.type="string"/>
+  <key id="d5" for="node" attr.name="Capacities" attr.type="string"/>
+  <key id="d4" for="node" attr.name="Type" attr.type="string"/>
+  <key id="d3" for="node" attr.name="Name" attr.type="string"/>
+  <key id="d2" for="node" attr.name="NodeID" attr.type="string"/>
+  <key id="d1" for="node" attr.name="Class" attr.type="string"/>
+  <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
+  <graph edgedefault="undirected">
+    <node id="170" labels=":GraphNode:NetworkNode">
+      <data key="d0">bffe332b-4315-4d1e-8356-8b146325ab68</data>
+      <data key="d1">NetworkNode</data>
+      <data key="d2">22195491-f06a-4dbc-a9cf-0823064e54e2</data>
+      <data key="d3">vm1</data>
+      <data key="d4">VM</data>
+      <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
+      <data key="d6">false</data>
+      <data key="d7">default_rocky_9,qcow2</data>
+      <data key="d8">RENC</data>
+    </node>
+    <node id="171" labels=":GraphNode:Component">
+      <data key="d0">bffe332b-4315-4d1e-8356-8b146325ab68</data>
+      <data key="d1">Component</data>
+      <data key="d2">8270fbbc-33a1-4cc8-b7f5-8764670267bc</data>
+      <data key="d3">dev</data>
+      <data key="d4">FPGA</data>
+      <data key="d9">Xilinx-SN1022</data>
+      <data key="d10">Xilinx SN1022 FPGA Dual 100G port accelerator card</data>
+      <data key="d6">false</data>
+    </node>
+    <node id="172" labels=":GraphNode:NetworkService">
+      <data key="d0">bffe332b-4315-4d1e-8356-8b146325ab68</data>
+      <data key="d1">NetworkService</data>
+      <data key="d2">54a2c1e4-44ac-441e-a1ce-555b594b8dd3</data>
+      <data key="d3">vm1-dev-l2p4</data>
+      <data key="d4">P4</data>
+      <data key="d6">false</data>
+      <data key="d11">L2</data>
+    </node>
+    <node id="173" labels=":GraphNode:ConnectionPoint">
+      <data key="d0">bffe332b-4315-4d1e-8356-8b146325ab68</data>
+      <data key="d1">ConnectionPoint</data>
+      <data key="d2">3f9c43e7-d1e4-4913-a38e-4280b2406a17</data>
+      <data key="d3">dev-p1</data>
+      <data key="d4">DedicatedPort</data>
+      <data key="d5">{"bw": 100, "unit": 1}</data>
+      <data key="d12">{"local_name": "p1"}</data>
+      <data key="d6">false</data>
+    </node>
+    <node id="174" labels=":GraphNode:ConnectionPoint">
+      <data key="d0">bffe332b-4315-4d1e-8356-8b146325ab68</data>
+      <data key="d1">ConnectionPoint</data>
+      <data key="d2">16aa7e69-b776-428d-9c0c-8dba0e6ecc80</data>
+      <data key="d3">dev-p2</data>
+      <data key="d4">DedicatedPort</data>
+      <data key="d5">{"bw": 100, "unit": 1}</data>
+      <data key="d12">{"local_name": "p2"}</data>
+      <data key="d6">false</data>
+    </node>
+    <edge source="170" target="171" label="has">
+      <data key="d13">has</data>
+    </edge>
+    <edge source="171" target="172" label="has">
+      <data key="d13">has</data>
+    </edge>
+    <edge source="172" target="173" label="connects">
+      <data key="d13">connects</data>
+    </edge>
+    <edge source="172" target="174" label="connects">
+      <data key="d13">connects</data>
+    </edge>
+  </graph>
+</graphml>

@@ -1,0 +1,24 @@
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d8" for="node" attr.name="Site" attr.type="string"/>
+  <key id="d7" for="node" attr.name="ImageRef" attr.type="string"/>
+  <key id="d6" for="node" attr.name="StitchNode" attr.type="string"/>
+  <key id="d5" for="node" attr.name="Capacities" attr.type="string"/>
+  <key id="d4" for="node" attr.name="Type" attr.type="string"/>
+  <key id="d3" for="node" attr.name="Name" attr.type="string"/>
+  <key id="d2" for="node" attr.name="NodeID" attr.type="string"/>
+  <key id="d1" for="node" attr.name="Class" attr.type="string"/>
+  <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
+  <graph edgedefault="undirected">
+    <node id="1" labels=":GraphNode:NetworkNode">
+      <data key="d0">9a850880-cea5-4240-b5e8-d4b7d81cc187</data>
+      <data key="d1">NetworkNode</data>
+      <data key="d2">d274692e-f397-4ee2-8301-b27dd6dacea4</data>
+      <data key="d3">vm1</data>
+      <data key="d4">VM</data>
+      <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
+      <data key="d6">false</data>
+      <data key="d7">default_rocky_9,qcow2</data>
+      <data key="d8">RENC</data>
+    </node>
+  </graph>
+</graphml>

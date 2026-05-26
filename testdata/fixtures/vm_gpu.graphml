@@ -1,0 +1,40 @@
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d11" for="edge" attr.name="Class" attr.type="string"/>
+  <key id="d10" for="node" attr.name="Details" attr.type="string"/>
+  <key id="d9" for="node" attr.name="Model" attr.type="string"/>
+  <key id="d8" for="node" attr.name="Site" attr.type="string"/>
+  <key id="d7" for="node" attr.name="ImageRef" attr.type="string"/>
+  <key id="d6" for="node" attr.name="StitchNode" attr.type="string"/>
+  <key id="d5" for="node" attr.name="Capacities" attr.type="string"/>
+  <key id="d4" for="node" attr.name="Type" attr.type="string"/>
+  <key id="d3" for="node" attr.name="Name" attr.type="string"/>
+  <key id="d2" for="node" attr.name="NodeID" attr.type="string"/>
+  <key id="d1" for="node" attr.name="Class" attr.type="string"/>
+  <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
+  <graph edgedefault="undirected">
+    <node id="11" labels=":GraphNode:NetworkNode">
+      <data key="d0">3b82177d-8ecf-40dc-979c-551e1f131386</data>
+      <data key="d1">NetworkNode</data>
+      <data key="d2">6cd0ab50-925d-4f9a-8c6c-b9cab6fb9617</data>
+      <data key="d3">vm1</data>
+      <data key="d4">VM</data>
+      <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
+      <data key="d6">false</data>
+      <data key="d7">default_rocky_9,qcow2</data>
+      <data key="d8">RENC</data>
+    </node>
+    <node id="12" labels=":GraphNode:Component">
+      <data key="d0">3b82177d-8ecf-40dc-979c-551e1f131386</data>
+      <data key="d1">Component</data>
+      <data key="d2">c72d8d61-6c20-49d9-9522-43be9f761050</data>
+      <data key="d3">gpu1</data>
+      <data key="d4">GPU</data>
+      <data key="d9">RTX6000</data>
+      <data key="d10">NVIDIA Corporation TU102GL [Quadro RTX 6000/8000] (rev a1)</data>
+      <data key="d6">false</data>
+    </node>
+    <edge source="11" target="12" label="has">
+      <data key="d11">has</data>
+    </edge>
+  </graph>
+</graphml>

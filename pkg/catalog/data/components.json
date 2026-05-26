@@ -1,0 +1,116 @@
+[
+  {
+    "Model": "RTX6000",
+    "AlsoModels": ["Quadro RTX 6000/8000"],
+    "Type": "GPU",
+    "Details": "NVIDIA Corporation TU102GL [Quadro RTX 6000/8000] (rev a1)"
+  },
+  {
+    "Model": "Tesla T4",
+    "Type": "GPU",
+    "Details": "NVIDIA Corporation TU104GL [Tesla T4] (rev a1)"
+  },
+    {
+    "Model": "A40",
+    "Type": "GPU",
+    "Details": "NVIDIA Corporation GA102GL [A40] (rev a1)"
+  },
+  {
+    "Model": "A30",
+    "AlsoModels": ["A30 PCIe"],
+    "Type": "GPU",
+    "Details": " NVIDIA Corporation GA100GL [A30 PCIe] (rev a1)"
+  },
+  {
+    "Model": "ConnectX-6",
+    "Type": "SharedNIC",
+    "Interfaces": {
+      "p1": "100"
+    },
+    "Details": "Mellanox ConnectX-6 VPI MCX653 dual port 100Gbps"
+  },
+  {
+    "Model": "BlueField-2-ConnectX-6",
+    "Type": "SmartNIC",
+    "Interfaces": {
+      "p1": "100",
+      "p2": "100"
+    },
+    "Details": "Mellanox ConnectX-6 MT42822 BlueField-2 dual port 100Gbps"
+  },
+  {
+    "Model": "ConnectX-7-400",
+    "Type": "SmartNIC",
+    "Interfaces": {
+      "p1": "400",
+      "p2": "400"
+    },
+    "Details": "Mellanox ConnectX-7 MT43244 BlueField-3 dual port 400Gbps"
+  },
+  {
+    "Model": "ConnectX-7-100",
+    "Type": "SmartNIC",
+    "Interfaces": {
+      "p1": "100",
+      "p2": "100"
+    },
+    "Details": "Mellanox ConnectX-7 MT4277 BlueField-3 dual port 100Gbps"
+  },
+  {
+    "Model": "ConnectX-6",
+    "Type": "SmartNIC",
+    "Interfaces": {
+      "p1": "100",
+      "p2": "100"
+    },
+    "Details": "Mellanox ConnectX-6 VPI MCX653 dual port 100Gbps"
+  },
+  {
+    "Model": "ConnectX-5",
+    "Type": "SmartNIC",
+    "Details": "Mellanox ConnectX-5 Dual Port 10/25GbE",
+    "Interfaces": {
+      "p1": "25",
+      "p2": "25"
+    }
+  },
+  {
+    "Model": "OpenStack-vNIC",
+    "Type": "SharedNIC",
+    "Details": "OpenStack virtual vNIC typically 1Gbps",
+    "Interfaces": {
+      "p1": "1"
+    }
+  },
+  {
+    "Model": "P4510",
+    "Type": "NVME",
+    "Details": "Dell Express Flash NVMe P4510 1TB SFF",
+    "Capacity": "1000"
+  },
+  {
+    "Model": "NAS",
+    "Type": "Storage",
+    "Details": "Site-local NAS share"
+  },
+  {
+    "Model": "Xilinx-U280",
+    "AlsoModels": ["Alveo U280"],
+    "Type" : "FPGA",
+    "Details": "Xilinx U280 FPGA Dual 100G port accelerator card",
+    "Interfaces": {
+      "p1": "100",
+      "p2": "100"
+    }
+  },
+  {
+    "Model": "Xilinx-SN1022",
+    "AlsoModels": ["Alveo SN1022"],
+    "Type" : "FPGA",
+    "Details": "Xilinx SN1022 FPGA Dual 100G port accelerator card",
+    "Interfaces": {
+      "p1": "100",
+      "p2": "100"
+    }
+  }
+]

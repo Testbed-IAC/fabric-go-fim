@@ -1,0 +1,80 @@
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d13" for="edge" attr.name="Class" attr.type="string"/>
+  <key id="d12" for="node" attr.name="Labels" attr.type="string"/>
+  <key id="d11" for="node" attr.name="Layer" attr.type="string"/>
+  <key id="d10" for="node" attr.name="Details" attr.type="string"/>
+  <key id="d9" for="node" attr.name="Model" attr.type="string"/>
+  <key id="d8" for="node" attr.name="Site" attr.type="string"/>
+  <key id="d7" for="node" attr.name="ImageRef" attr.type="string"/>
+  <key id="d6" for="node" attr.name="StitchNode" attr.type="string"/>
+  <key id="d5" for="node" attr.name="Capacities" attr.type="string"/>
+  <key id="d4" for="node" attr.name="Type" attr.type="string"/>
+  <key id="d3" for="node" attr.name="Name" attr.type="string"/>
+  <key id="d2" for="node" attr.name="NodeID" attr.type="string"/>
+  <key id="d1" for="node" attr.name="Class" attr.type="string"/>
+  <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
+  <graph edgedefault="undirected">
+    <node id="6" labels=":GraphNode:NetworkNode">
+      <data key="d0">83634ddd-0ed9-44f1-965a-600500642452</data>
+      <data key="d1">NetworkNode</data>
+      <data key="d2">00effabc-4754-48ec-a1fa-855f2eb619d6</data>
+      <data key="d3">vm1</data>
+      <data key="d4">VM</data>
+      <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
+      <data key="d6">false</data>
+      <data key="d7">default_rocky_9,qcow2</data>
+      <data key="d8">RENC</data>
+    </node>
+    <node id="7" labels=":GraphNode:Component">
+      <data key="d0">83634ddd-0ed9-44f1-965a-600500642452</data>
+      <data key="d1">Component</data>
+      <data key="d2">8782c381-dd28-4e5e-90e9-419224eddbc9</data>
+      <data key="d3">snic</data>
+      <data key="d4">SmartNIC</data>
+      <data key="d9">ConnectX-6</data>
+      <data key="d10">Mellanox ConnectX-6 VPI MCX653 dual port 100Gbps</data>
+      <data key="d6">false</data>
+    </node>
+    <node id="8" labels=":GraphNode:NetworkService">
+      <data key="d0">83634ddd-0ed9-44f1-965a-600500642452</data>
+      <data key="d1">NetworkService</data>
+      <data key="d2">fc5e9c28-6e6e-448c-8c94-ee090b18aace</data>
+      <data key="d3">vm1-snic-l2ovs</data>
+      <data key="d4">OVS</data>
+      <data key="d6">false</data>
+      <data key="d11">L2</data>
+    </node>
+    <node id="9" labels=":GraphNode:ConnectionPoint">
+      <data key="d0">83634ddd-0ed9-44f1-965a-600500642452</data>
+      <data key="d1">ConnectionPoint</data>
+      <data key="d2">6f4cb3db-b930-41fa-9110-ce15793e9af0</data>
+      <data key="d3">snic-p1</data>
+      <data key="d4">DedicatedPort</data>
+      <data key="d5">{"bw": 100, "unit": 1}</data>
+      <data key="d12">{"local_name": "p1"}</data>
+      <data key="d6">false</data>
+    </node>
+    <node id="10" labels=":GraphNode:ConnectionPoint">
+      <data key="d0">83634ddd-0ed9-44f1-965a-600500642452</data>
+      <data key="d1">ConnectionPoint</data>
+      <data key="d2">11295351-4065-44fb-a5b8-012a5be0d513</data>
+      <data key="d3">snic-p2</data>
+      <data key="d4">DedicatedPort</data>
+      <data key="d5">{"bw": 100, "unit": 1}</data>
+      <data key="d12">{"local_name": "p2"}</data>
+      <data key="d6">false</data>
+    </node>
+    <edge source="6" target="7" label="has">
+      <data key="d13">has</data>
+    </edge>
+    <edge source="7" target="8" label="has">
+      <data key="d13">has</data>
+    </edge>
+    <edge source="8" target="9" label="connects">
+      <data key="d13">connects</data>
+    </edge>
+    <edge source="8" target="10" label="connects">
+      <data key="d13">connects</data>
+    </edge>
+  </graph>
+</graphml>
