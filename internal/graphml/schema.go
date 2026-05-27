@@ -3,7 +3,7 @@ package graphml
 import "encoding/xml"
 
 type document struct {
-	XMLName        xml.Name `xml:"http://graphml.graphdrawing.org/xmlns graphml"`
+	XMLName        xml.Name `xml:"graphml"`
 	XMLNS          string   `xml:"xmlns,attr,omitempty"`
 	XSI            string   `xml:"xmlns:xsi,attr,omitempty"`
 	SchemaLocation string   `xml:"xsi:schemaLocation,attr,omitempty"`
@@ -19,7 +19,7 @@ type keyXML struct {
 }
 
 type graphXML struct {
-	ID          string    `xml:"id,attr"`
+	ID          string    `xml:"id,attr,omitempty"`
 	EdgeDefault string    `xml:"edgedefault,attr"`
 	Nodes       []nodeXML `xml:"node"`
 	Edges       []edgeXML `xml:"edge"`

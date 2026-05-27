@@ -29,7 +29,7 @@ func Write(w io.Writer, g *graph.Graph) error {
 		XMLNS:          graphMLNamespace,
 		XSI:            xsiNamespace,
 		SchemaLocation: schemaLocation,
-		Graph:          graphXML{ID: "G", EdgeDefault: "directed"},
+		Graph:          graphXML{EdgeDefault: "undirected"},
 	}
 	for _, name := range nodeKeys {
 		doc.Keys = append(doc.Keys, keyXML{ID: name, For: "node", AttrName: name, AttrType: "string"})
@@ -66,8 +66,10 @@ func Write(w io.Writer, g *graph.Graph) error {
 func collectKeys(nodes []*graph.Node, edges []*graph.Edge) ([]string, []string) {
 	nodeSet := map[string]struct{}{}
 	for _, node := range nodes {
-		nodeSet[sliver.PropXMLLabels] = struct{}{}
 		for key := range node.Props {
+			if key == sliver.PropXMLLabels {
+				continue
+			}
 			nodeSet[key] = struct{}{}
 		}
 	}
@@ -90,9 +92,11 @@ func sortedKeys(set map[string]struct{}) []string {
 
 func nodeToXML(node *graph.Node, xmlID string, nodeKeys []string) nodeXML {
 	label := ":GraphNode:" + node.Class
-	dataByKey := make(map[string]string, len(node.Props)+1)
-	dataByKey[sliver.PropXMLLabels] = label
+	dataByKey := make(map[string]string, len(node.Props))
 	for key, value := range node.Props {
+		if key == sliver.PropXMLLabels {
+			continue
+		}
 		if value != "" {
 			dataByKey[key] = value
 		}
