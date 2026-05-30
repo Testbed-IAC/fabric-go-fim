@@ -107,6 +107,12 @@ func (t *Topology) AddNetworkService(opts NetworkServiceOpts) (*NetworkService, 
 	return t.addNetworkService("", opts)
 }
 
+// ValidateNetworkService validates a top-level NetworkService without mutating
+// the topology. It applies the same FIM construction rules as AddNetworkService.
+func (t *Topology) ValidateNetworkService(opts NetworkServiceOpts) error {
+	return t.validateNetworkServiceOpts("", opts)
+}
+
 // AddFacility adds a Facility NetworkNode with an internal service and ports.
 func (t *Topology) AddFacility(opts FacilityOpts) (*Node, error) {
 	serviceType := opts.Type

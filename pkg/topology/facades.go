@@ -148,6 +148,13 @@ func (n *Node) AddNetworkService(opts NetworkServiceOpts) (*NetworkService, erro
 	return n.t.addNetworkService(n.id, opts)
 }
 
+// ValidateNetworkService validates a NetworkService owned by this node without
+// mutating the topology. It applies the same FIM construction rules as
+// AddNetworkService.
+func (n *Node) ValidateNetworkService(opts NetworkServiceOpts) error {
+	return n.t.validateNetworkServiceOpts(n.id, opts)
+}
+
 // Components returns components directly owned by this node.
 func (n *Node) Components() []*Component {
 	var out []*Component

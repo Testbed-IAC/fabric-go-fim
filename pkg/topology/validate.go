@@ -7,49 +7,83 @@ import (
 	"github.com/Testbed-IAC/fabric-go-fim/pkg/sliver"
 )
 
-type serviceConstraint struct {
-	minInterfaces int
-	maxInterfaces int
-	maxSites      int
+// NetworkServiceConstraint describes the FIM construction limits for a
+// NetworkService type.
+//
+// Zero MaxInterfaces or MaxSites means no explicit upper bound. Zero ExactSites
+// means the service does not require an exact site count.
+type NetworkServiceConstraint struct {
+	MinInterfaces          int
+	MaxInterfaces          int
+	MaxSites               int
+	ExactSites             int
+	RequiredInterfaceTypes []sliver.InterfaceType
 }
 
-var serviceConstraints = map[sliver.ServiceType]serviceConstraint{
-	sliver.ServiceTypeP4:          {minInterfaces: 1, maxSites: 1},
-	sliver.ServiceTypeOVS:         {minInterfaces: 1, maxSites: 1},
-	sliver.ServiceTypeVLAN:        {minInterfaces: 1, maxSites: 1},
-	sliver.ServiceTypeMPLS:        {minInterfaces: 1, maxSites: 1},
-	sliver.ServiceTypeL2Path:      {minInterfaces: 1, maxInterfaces: 2, maxSites: 2},
-	sliver.ServiceTypeL2STS:       {minInterfaces: 2, maxSites: 2},
-	sliver.ServiceTypeL2PTP:       {minInterfaces: 2, maxInterfaces: 2, maxSites: 2},
-	sliver.ServiceTypeL2Multisite: {minInterfaces: 1},
-	sliver.ServiceTypeL2Bridge:    {minInterfaces: 1, maxSites: 1},
-	sliver.ServiceTypeFABNetv4:    {minInterfaces: 1, maxSites: 1},
-	sliver.ServiceTypeFABNetv6:    {minInterfaces: 1, maxSites: 1},
-	sliver.ServiceTypeFABNetv4Ext: {minInterfaces: 1, maxSites: 1},
-	sliver.ServiceTypeFABNetv6Ext: {minInterfaces: 1, maxSites: 1},
-	sliver.ServiceTypeL3VPN:       {minInterfaces: 1},
-	sliver.ServiceTypePortMirror:  {minInterfaces: 1, maxInterfaces: 1, maxSites: 1},
+var networkServiceConstraints = map[sliver.ServiceType]NetworkServiceConstraint{
+	sliver.ServiceTypeP4:          {MinInterfaces: 1, MaxSites: 1},
+	sliver.ServiceTypeOVS:         {MinInterfaces: 1, MaxSites: 1},
+	sliver.ServiceTypeVLAN:        {MinInterfaces: 1, MaxSites: 1},
+	sliver.ServiceTypeMPLS:        {MinInterfaces: 1, MaxSites: 1},
+	sliver.ServiceTypeL2Path:      {MinInterfaces: 1, MaxInterfaces: 2, MaxSites: 2},
+	sliver.ServiceTypeL2STS:       {MinInterfaces: 2, MaxSites: 2, ExactSites: 2},
+	sliver.ServiceTypeL2PTP:       {MinInterfaces: 2, MaxInterfaces: 2, MaxSites: 2, ExactSites: 2, RequiredInterfaceTypes: []sliver.InterfaceType{sliver.InterfaceTypeDedicatedPort, sliver.InterfaceTypeFacilityPort, sliver.InterfaceTypeSubInterface}},
+	sliver.ServiceTypeL2Multisite: {MinInterfaces: 1},
+	sliver.ServiceTypeL2Bridge:    {MinInterfaces: 1, MaxSites: 1},
+	sliver.ServiceTypeFABNetv4:    {MinInterfaces: 1, MaxSites: 1},
+	sliver.ServiceTypeFABNetv6:    {MinInterfaces: 1, MaxSites: 1},
+	sliver.ServiceTypeFABNetv4Ext: {MinInterfaces: 1, MaxSites: 1},
+	sliver.ServiceTypeFABNetv6Ext: {MinInterfaces: 1, MaxSites: 1},
+	sliver.ServiceTypeL3VPN:       {MinInterfaces: 1},
+	sliver.ServiceTypePortMirror:  {MinInterfaces: 1, MaxInterfaces: 1, MaxSites: 1},
+}
+
+// NetworkServiceConstraints returns a copy of the known FIM NetworkService
+// construction constraints keyed by service type.
+func NetworkServiceConstraints() map[sliver.ServiceType]NetworkServiceConstraint {
+	out := make(map[sliver.ServiceType]NetworkServiceConstraint, len(networkServiceConstraints))
+	for serviceType, constraint := range networkServiceConstraints {
+		constraint.RequiredInterfaceTypes = append([]sliver.InterfaceType(nil), constraint.RequiredInterfaceTypes...)
+		out[serviceType] = constraint
+	}
+	return out
+}
+
+// NetworkServiceConstraintFor returns the construction constraint for a known
+// NetworkService type.
+func NetworkServiceConstraintFor(serviceType sliver.ServiceType) (NetworkServiceConstraint, bool) {
+	constraint, ok := networkServiceConstraints[serviceType]
+	constraint.RequiredInterfaceTypes = append([]sliver.InterfaceType(nil), constraint.RequiredInterfaceTypes...)
+	return constraint, ok
+}
+
+func (c NetworkServiceConstraint) allowsInterfaceType(interfaceType sliver.InterfaceType) bool {
+	if len(c.RequiredInterfaceTypes) == 0 {
+		return true
+	}
+	for _, required := range c.RequiredInterfaceTypes {
+		if interfaceType == required {
+			return true
+		}
+	}
+	return false
 }
 
 func validateServiceInterfaces(t *Topology, parentID string, opts NetworkServiceOpts) error {
-	constraint := serviceConstraints[opts.Type]
-	if parentID == "" && len(opts.Interfaces) < constraint.minInterfaces {
-		return diagnostic(fmt.Errorf("%w: service %q of type %s requires at least %d interfaces, got %d", ErrConstraintViolation, opts.Name, opts.Type, constraint.minInterfaces, len(opts.Interfaces)), "Interfaces", "")
+	constraint := networkServiceConstraints[opts.Type]
+	if parentID == "" && len(opts.Interfaces) < constraint.MinInterfaces {
+		return diagnostic(fmt.Errorf("%w: service %q of type %s requires at least %d interfaces, got %d", ErrConstraintViolation, opts.Name, opts.Type, constraint.MinInterfaces, len(opts.Interfaces)), "Interfaces", "")
 	}
-	if constraint.maxInterfaces > 0 && len(opts.Interfaces) > constraint.maxInterfaces {
-		return diagnostic(fmt.Errorf("%w: service %q of type %s allows at most %d interfaces, got %d", ErrConstraintViolation, opts.Name, opts.Type, constraint.maxInterfaces, len(opts.Interfaces)), "Interfaces", "")
+	if constraint.MaxInterfaces > 0 && len(opts.Interfaces) > constraint.MaxInterfaces {
+		return diagnostic(fmt.Errorf("%w: service %q of type %s allows at most %d interfaces, got %d", ErrConstraintViolation, opts.Name, opts.Type, constraint.MaxInterfaces, len(opts.Interfaces)), "Interfaces", "")
 	}
 	sites := make(map[string]struct{})
 	for _, iface := range opts.Interfaces {
 		if iface == nil {
 			return diagnostic(fmt.Errorf("%w: service %q has nil interface", ErrInvalidOption, opts.Name), "Interfaces", "")
 		}
-		if opts.Type == sliver.ServiceTypeL2PTP {
-			switch iface.Type() {
-			case sliver.InterfaceTypeDedicatedPort, sliver.InterfaceTypeFacilityPort, sliver.InterfaceTypeSubInterface:
-			default:
-				return diagnostic(fmt.Errorf("%w: L2PTP service %q cannot connect interface %q of type %s", ErrConstraintViolation, opts.Name, iface.Name(), iface.Type()), "Interfaces", "")
-			}
+		if !constraint.allowsInterfaceType(iface.Type()) {
+			return diagnostic(fmt.Errorf("%w: service %q of type %s cannot connect interface %q of type %s", ErrConstraintViolation, opts.Name, opts.Type, iface.Name(), iface.Type()), "Interfaces", "")
 		}
 		site := t.siteOfInterface(iface)
 		if site != "" {
@@ -59,13 +93,11 @@ func validateServiceInterfaces(t *Topology, parentID string, opts NetworkService
 	if opts.Site != "" {
 		sites[opts.Site] = struct{}{}
 	}
-	if constraint.maxSites > 0 && len(sites) > constraint.maxSites {
-		return diagnostic(fmt.Errorf("%w: service %q of type %s allows at most %d sites, got %d", ErrConstraintViolation, opts.Name, opts.Type, constraint.maxSites, len(sites)), "Interfaces", "")
+	if constraint.MaxSites > 0 && len(sites) > constraint.MaxSites {
+		return diagnostic(fmt.Errorf("%w: service %q of type %s allows at most %d sites, got %d", ErrConstraintViolation, opts.Name, opts.Type, constraint.MaxSites, len(sites)), "Interfaces", "")
 	}
-	// L2STS and L2PTP are cross-site services that require exactly 2 sites.
-	// L2Path allows same-site or cross-site (no minimum site count enforced).
-	if (opts.Type == sliver.ServiceTypeL2STS || opts.Type == sliver.ServiceTypeL2PTP) && len(sites) != 2 && len(opts.Interfaces) > 0 {
-		return diagnostic(fmt.Errorf("%w: service %q of type %s requires exactly 2 sites, got %d", ErrConstraintViolation, opts.Name, opts.Type, len(sites)), "Interfaces", "")
+	if constraint.ExactSites > 0 && len(sites) != constraint.ExactSites && len(opts.Interfaces) > 0 {
+		return diagnostic(fmt.Errorf("%w: service %q of type %s requires exactly %d sites, got %d", ErrConstraintViolation, opts.Name, opts.Type, constraint.ExactSites, len(sites)), "Interfaces", "")
 	}
 	if opts.Gateway != nil {
 		if err := opts.Gateway.Validate(); err != nil {
@@ -76,7 +108,7 @@ func validateServiceInterfaces(t *Topology, parentID string, opts NetworkService
 }
 
 func serviceMaxSites(serviceType sliver.ServiceType) int {
-	return serviceConstraints[serviceType].maxSites
+	return networkServiceConstraints[serviceType].MaxSites
 }
 
 func (t *Topology) siteOfInterface(iface *Interface) string {

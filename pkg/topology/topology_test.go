@@ -57,6 +57,47 @@ func TestValidationErrors(t *testing.T) {
 	}
 }
 
+func TestNetworkServiceConstraintLookup(t *testing.T) {
+	t.Parallel()
+
+	constraints := NetworkServiceConstraints()
+	constraints[sliver.ServiceTypeL2Bridge] = NetworkServiceConstraint{}
+
+	l2Bridge, ok := NetworkServiceConstraintFor(sliver.ServiceTypeL2Bridge)
+	if !ok {
+		t.Fatalf("missing L2Bridge constraint")
+	}
+	if l2Bridge.MinInterfaces != 1 || l2Bridge.MaxSites != 1 {
+		t.Fatalf("L2Bridge constraint = %+v, want minInterfaces=1 maxSites=1", l2Bridge)
+	}
+
+	l2ptp, ok := NetworkServiceConstraintFor(sliver.ServiceTypeL2PTP)
+	if !ok {
+		t.Fatalf("missing L2PTP constraint")
+	}
+	if l2ptp.MinInterfaces != 2 || l2ptp.MaxInterfaces != 2 || l2ptp.ExactSites != 2 {
+		t.Fatalf("L2PTP constraint = %+v, want minInterfaces=2 maxInterfaces=2 exactSites=2", l2ptp)
+	}
+	if !l2ptp.allowsInterfaceType(sliver.InterfaceTypeDedicatedPort) || l2ptp.allowsInterfaceType(sliver.InterfaceTypeServicePort) {
+		t.Fatalf("L2PTP required interface types = %+v, want dedicated/facility/subinterface only", l2ptp.RequiredInterfaceTypes)
+	}
+}
+
+func TestValidateNetworkServiceIsSideEffectFree(t *testing.T) {
+	t.Parallel()
+
+	topo := NewWithID("graph-id")
+	ifaces := twoSharedInterfaces(t, topo, "RENC", "UKY")
+	serviceCount := len(topo.NetworkServices())
+	err := topo.ValidateNetworkService(NetworkServiceOpts{Name: "lan1", Type: sliver.ServiceTypeL2Bridge, Interfaces: ifaces})
+	if !errors.Is(err, ErrConstraintViolation) {
+		t.Fatalf("ValidateNetworkService error = %v, want ErrConstraintViolation", err)
+	}
+	if services := topo.NetworkServices(); len(services) != serviceCount {
+		t.Fatalf("ValidateNetworkService mutated topology: got %d network services, want %d", len(services), serviceCount)
+	}
+}
+
 func buildBareVM(t *testing.T, topo *Topology) {
 	t.Helper()
 	addVM(t, topo, "vm1", "RENC")
