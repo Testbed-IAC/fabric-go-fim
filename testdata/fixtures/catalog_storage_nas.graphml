@@ -12,10 +12,10 @@
   <key id="d1" for="node" attr.name="Class" attr.type="string"/>
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
-    <node id="11" labels=":GraphNode:NetworkNode">
-      <data key="d0">27bb6a24-f67c-4f89-80d8-2183342d9bd2</data>
+    <node id="243" labels=":GraphNode:NetworkNode">
+      <data key="d0">a1308009-d843-4af8-bc2f-6f31afdfef07</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">b62f957e-2553-4388-9503-e1ac272f0483</data>
+      <data key="d2">1f520cfc-9b44-41a8-a994-afadcd896816</data>
       <data key="d3">vm1</data>
       <data key="d4">VM</data>
       <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
@@ -23,17 +23,17 @@
       <data key="d7">default_rocky_9,qcow2</data>
       <data key="d8">RENC</data>
     </node>
-    <node id="12" labels=":GraphNode:Component">
-      <data key="d0">27bb6a24-f67c-4f89-80d8-2183342d9bd2</data>
+    <node id="244" labels=":GraphNode:Component">
+      <data key="d0">a1308009-d843-4af8-bc2f-6f31afdfef07</data>
       <data key="d1">Component</data>
-      <data key="d2">b3257639-4687-462c-adf2-80851f3f9622</data>
-      <data key="d3">gpu1</data>
-      <data key="d4">GPU</data>
-      <data key="d9">RTX6000</data>
-      <data key="d10">NVIDIA Corporation TU102GL [Quadro RTX 6000/8000] (rev a1)</data>
+      <data key="d2">1cd5ba73-503f-463d-a25e-00ea147de50a</data>
+      <data key="d3">dev</data>
+      <data key="d4">Storage</data>
+      <data key="d9">NAS</data>
+      <data key="d10">Site-local NAS share</data>
       <data key="d6">false</data>
     </node>
-    <edge source="11" target="12" label="has">
+    <edge source="243" target="244" label="has">
       <data key="d11">has</data>
     </edge>
   </graph>

@@ -12,10 +12,10 @@
   <key id="d1" for="node" attr.name="Class" attr.type="string"/>
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
-    <node id="155" labels=":GraphNode:NetworkNode">
-      <data key="d0">fd127a3d-19bd-4383-98ef-f7fa563d79b2</data>
+    <node id="233" labels=":GraphNode:NetworkNode">
+      <data key="d0">8276ea99-eb2a-4dcf-b169-8fe07844a0f1</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">b019aefc-1598-41b6-a947-b8e5127aebeb</data>
+      <data key="d2">c21cc978-fabe-4efb-924d-24a752071acd</data>
       <data key="d3">vm1</data>
       <data key="d4">VM</data>
       <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
@@ -23,17 +23,17 @@
       <data key="d7">default_rocky_9,qcow2</data>
       <data key="d8">RENC</data>
     </node>
-    <node id="156" labels=":GraphNode:Component">
-      <data key="d0">fd127a3d-19bd-4383-98ef-f7fa563d79b2</data>
+    <node id="234" labels=":GraphNode:Component">
+      <data key="d0">8276ea99-eb2a-4dcf-b169-8fe07844a0f1</data>
       <data key="d1">Component</data>
-      <data key="d2">cce93b60-e379-40bf-baf0-fd47795b7c57</data>
+      <data key="d2">fa10ba95-3d0a-4f3e-a156-92fdf12be50d</data>
       <data key="d3">dev</data>
       <data key="d4">GPU</data>
       <data key="d9">Tesla T4</data>
       <data key="d10">NVIDIA Corporation TU104GL [Tesla T4] (rev a1)</data>
       <data key="d6">false</data>
     </node>
-    <edge source="155" target="156" label="has">
+    <edge source="233" target="234" label="has">
       <data key="d11">has</data>
     </edge>
   </graph>

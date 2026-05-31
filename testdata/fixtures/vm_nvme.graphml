@@ -13,9 +13,9 @@
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
     <node id="13" labels=":GraphNode:NetworkNode">
-      <data key="d0">2bfb02a9-ee92-4197-a347-422ac46443a1</data>
+      <data key="d0">e44858e3-528b-4ef9-badc-e0b732a9f5b9</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">96e008c4-b748-49e4-8ebe-a6f1948ed629</data>
+      <data key="d2">d1f9e7c6-98f9-416d-b081-64e4e4983dc3</data>
       <data key="d3">vm1</data>
       <data key="d4">VM</data>
       <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
@@ -24,9 +24,9 @@
       <data key="d8">RENC</data>
     </node>
     <node id="14" labels=":GraphNode:Component">
-      <data key="d0">2bfb02a9-ee92-4197-a347-422ac46443a1</data>
+      <data key="d0">e44858e3-528b-4ef9-badc-e0b732a9f5b9</data>
       <data key="d1">Component</data>
-      <data key="d2">2d344b92-5637-402a-8be9-3f6fc2b94a26</data>
+      <data key="d2">21ca1434-159f-4c50-a379-0ca3efe05700</data>
       <data key="d3">ssd</data>
       <data key="d4">NVME</data>
       <data key="d9">P4510</data>

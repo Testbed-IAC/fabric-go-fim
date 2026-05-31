@@ -12,10 +12,10 @@
   <key id="d1" for="node" attr.name="Class" attr.type="string"/>
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
-    <node id="159" labels=":GraphNode:NetworkNode">
-      <data key="d0">55bb461a-6f59-4862-a173-0de8ae3166eb</data>
+    <node id="237" labels=":GraphNode:NetworkNode">
+      <data key="d0">8253d49a-775b-4380-a4c3-70834cbc7673</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">646d4e87-5596-47d6-9003-72b94f7608f2</data>
+      <data key="d2">70dfd3ad-4a40-45da-a240-ad329db3bd70</data>
       <data key="d3">vm1</data>
       <data key="d4">VM</data>
       <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
@@ -23,17 +23,17 @@
       <data key="d7">default_rocky_9,qcow2</data>
       <data key="d8">RENC</data>
     </node>
-    <node id="160" labels=":GraphNode:Component">
-      <data key="d0">55bb461a-6f59-4862-a173-0de8ae3166eb</data>
+    <node id="238" labels=":GraphNode:Component">
+      <data key="d0">8253d49a-775b-4380-a4c3-70834cbc7673</data>
       <data key="d1">Component</data>
-      <data key="d2">53a997e0-2704-4884-9acd-4e4bbf33d12a</data>
+      <data key="d2">3f3caec9-5252-4989-87f4-da7a53bfcc00</data>
       <data key="d3">dev</data>
       <data key="d4">GPU</data>
       <data key="d9">A30</data>
       <data key="d10"> NVIDIA Corporation GA100GL [A30 PCIe] (rev a1)</data>
       <data key="d6">false</data>
     </node>
-    <edge source="159" target="160" label="has">
+    <edge source="237" target="238" label="has">
       <data key="d11">has</data>
     </edge>
   </graph>

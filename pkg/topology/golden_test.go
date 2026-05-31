@@ -151,6 +151,48 @@ func TestGolden_FABNetv6(t *testing.T) {
 	compareFixtureToGo(t, "fabnetv6", topo)
 }
 
+// TestGolden_FABNetv4Ext verifies an externally-stitched FABNetv4Ext L3 service.
+func TestGolden_FABNetv4Ext(t *testing.T) {
+	topo := NewWithID(DeriveGraphID("golden-fabnetv4_ext"))
+	buildFABNetv4Ext(t, topo)
+	compareFixtureToGo(t, "fabnetv4_ext", topo)
+}
+
+// TestGolden_FABNetv6Ext verifies an externally-stitched FABNetv6Ext L3 service.
+func TestGolden_FABNetv6Ext(t *testing.T) {
+	topo := NewWithID(DeriveGraphID("golden-fabnetv6_ext"))
+	buildFABNetv6Ext(t, topo)
+	compareFixtureToGo(t, "fabnetv6_ext", topo)
+}
+
+// TestGolden_L3VPN verifies a multi-site L3VPN service (RENC + UKY).
+func TestGolden_L3VPN(t *testing.T) {
+	topo := NewWithID(DeriveGraphID("golden-l3vpn"))
+	buildL3VPN(t, topo)
+	compareFixtureToGo(t, "l3vpn", topo)
+}
+
+// TestGolden_L2Multisite verifies a multi-site L2Multisite service (RENC + UKY).
+func TestGolden_L2Multisite(t *testing.T) {
+	topo := NewWithID(DeriveGraphID("golden-l2multisite"))
+	buildL2Multisite(t, topo)
+	compareFixtureToGo(t, "l2multisite", topo)
+}
+
+// TestGolden_MPLS verifies a single-site MPLS tunnel service.
+func TestGolden_MPLS(t *testing.T) {
+	topo := NewWithID(DeriveGraphID("golden-mpls"))
+	buildMPLS(t, topo)
+	compareFixtureToGo(t, "mpls", topo)
+}
+
+// TestGolden_VLAN verifies a single-site VLAN-terminated service.
+func TestGolden_VLAN(t *testing.T) {
+	topo := NewWithID(DeriveGraphID("golden-vlan"))
+	buildVLANService(t, topo)
+	compareFixtureToGo(t, "vlan", topo)
+}
+
 // TestGolden_FacilityPort verifies a Facility NetworkNode with a VLAN service
 // and a FacilityPort interface.
 func TestGolden_FacilityPort(t *testing.T) {
@@ -201,6 +243,84 @@ func buildFABNetv6(t *testing.T, topo *Topology) {
 }
 
 // ---------------------------------------------------------------------------
+// Gap service-type builders (not in topology_test.go)
+// ---------------------------------------------------------------------------
+
+func buildFABNetv4Ext(t *testing.T, topo *Topology) {
+	t.Helper()
+	ifaces := twoSharedInterfaces(t, topo, "RENC", "RENC")
+	if _, err := topo.AddNetworkService(NetworkServiceOpts{
+		Name:       "v4ext",
+		Type:       sliver.ServiceTypeFABNetv4Ext,
+		Interfaces: ifaces,
+		Gateway:    &sliver.Gateway{IPv4: "10.0.0.1", IPv4Subnet: "10.0.0.0/24"},
+	}); err != nil {
+		t.Fatalf("AddNetworkService FABNetv4Ext: %v", err)
+	}
+}
+
+func buildFABNetv6Ext(t *testing.T, topo *Topology) {
+	t.Helper()
+	ifaces := twoSharedInterfaces(t, topo, "RENC", "RENC")
+	if _, err := topo.AddNetworkService(NetworkServiceOpts{
+		Name:       "v6ext",
+		Type:       sliver.ServiceTypeFABNetv6Ext,
+		Interfaces: ifaces,
+		Gateway:    &sliver.Gateway{IPv6: "2001:db8::1", IPv6Subnet: "2001:db8::/32"},
+	}); err != nil {
+		t.Fatalf("AddNetworkService FABNetv6Ext: %v", err)
+	}
+}
+
+func buildL3VPN(t *testing.T, topo *Topology) {
+	t.Helper()
+	ifaces := twoSharedInterfaces(t, topo, "RENC", "UKY")
+	if _, err := topo.AddNetworkService(NetworkServiceOpts{
+		Name:       "l3vpn1",
+		Type:       sliver.ServiceTypeL3VPN,
+		Interfaces: ifaces,
+	}); err != nil {
+		t.Fatalf("AddNetworkService L3VPN: %v", err)
+	}
+}
+
+func buildL2Multisite(t *testing.T, topo *Topology) {
+	t.Helper()
+	ifaces := twoSharedInterfaces(t, topo, "RENC", "UKY")
+	if _, err := topo.AddNetworkService(NetworkServiceOpts{
+		Name:       "l2ms1",
+		Type:       sliver.ServiceTypeL2Multisite,
+		Interfaces: ifaces,
+	}); err != nil {
+		t.Fatalf("AddNetworkService L2Multisite: %v", err)
+	}
+}
+
+func buildMPLS(t *testing.T, topo *Topology) {
+	t.Helper()
+	ifaces := twoSharedInterfaces(t, topo, "RENC", "RENC")
+	if _, err := topo.AddNetworkService(NetworkServiceOpts{
+		Name:       "mpls1",
+		Type:       sliver.ServiceTypeMPLS,
+		Interfaces: ifaces,
+	}); err != nil {
+		t.Fatalf("AddNetworkService MPLS: %v", err)
+	}
+}
+
+func buildVLANService(t *testing.T, topo *Topology) {
+	t.Helper()
+	ifaces := twoSharedInterfaces(t, topo, "RENC", "RENC")
+	if _, err := topo.AddNetworkService(NetworkServiceOpts{
+		Name:       "vlan1",
+		Type:       sliver.ServiceTypeVLAN,
+		Interfaces: ifaces,
+	}); err != nil {
+		t.Fatalf("AddNetworkService VLAN: %v", err)
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Golden tests for per-catalog-model fixtures
 // ---------------------------------------------------------------------------
 
@@ -244,6 +364,15 @@ func TestGolden_Catalog_NVME_P4510(t *testing.T) {
 	vm := addVM(t, topo, "vm1", "RENC")
 	addComponent(t, vm, ComponentOpts{Name: "dev", Type: sliver.ComponentTypeNVME, Model: "P4510"})
 	compareFixtureToGo(t, "catalog_nvme_p4510", topo)
+}
+
+// TestGolden_Catalog_Storage_NAS cross-validates the Storage NAS component
+// (a port-less storage device).
+func TestGolden_Catalog_Storage_NAS(t *testing.T) {
+	topo := NewWithID(DeriveGraphID("golden-catalog-storage_nas"))
+	vm := addVM(t, topo, "vm1", "RENC")
+	addComponent(t, vm, ComponentOpts{Name: "dev", Type: sliver.ComponentTypeStorage, Model: "NAS"})
+	compareFixtureToGo(t, "catalog_storage_nas", topo)
 }
 
 // TestGolden_Catalog_FPGA_U280 cross-validates the FPGA Xilinx-U280 component.
@@ -449,6 +578,12 @@ func TestGolden_Structural_RoundTrip_AllPatterns(t *testing.T) {
 		{"l2ptp", buildL2PTP},
 		{"fabnetv4", buildFABNetv4},
 		{"fabnetv6", buildFABNetv6},
+		{"fabnetv4_ext", buildFABNetv4Ext},
+		{"fabnetv6_ext", buildFABNetv6Ext},
+		{"l3vpn", buildL3VPN},
+		{"l2multisite", buildL2Multisite},
+		{"mpls", buildMPLS},
+		{"vlan", buildVLANService},
 		{"facility_port", buildFacility},
 		{"switch_node", buildSwitch},
 		{"port_mirror", buildPortMirror},

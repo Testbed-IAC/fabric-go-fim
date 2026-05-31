@@ -13,7 +13,7 @@ func main() {
 
 	_, err := topo.AddNode(topology.NodeOpts{
 		Name:       "vm1",
-		Site:       "RENC",
+		Site:       "UTAH",
 		Type:       sliver.NodeTypeVM,
 		Capacities: &sliver.Capacities{Core: 2, RAM: 8, Disk: 10},
 		ImageRef:   "default_rocky_9",

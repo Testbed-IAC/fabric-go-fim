@@ -12,10 +12,10 @@
   <key id="d1" for="node" attr.name="Class" attr.type="string"/>
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
-    <node id="157" labels=":GraphNode:NetworkNode">
-      <data key="d0">61d5ee98-659b-456a-8e51-545fc1d43a2d</data>
+    <node id="235" labels=":GraphNode:NetworkNode">
+      <data key="d0">0f0e015f-3414-4d39-b721-cd3a8d287c0c</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">1efd70e2-0f9a-4d3f-b660-8ac558428686</data>
+      <data key="d2">d940dcb3-5d4a-4bb7-a870-19f5794e55ae</data>
       <data key="d3">vm1</data>
       <data key="d4">VM</data>
       <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
@@ -23,17 +23,17 @@
       <data key="d7">default_rocky_9,qcow2</data>
       <data key="d8">RENC</data>
     </node>
-    <node id="158" labels=":GraphNode:Component">
-      <data key="d0">61d5ee98-659b-456a-8e51-545fc1d43a2d</data>
+    <node id="236" labels=":GraphNode:Component">
+      <data key="d0">0f0e015f-3414-4d39-b721-cd3a8d287c0c</data>
       <data key="d1">Component</data>
-      <data key="d2">4b79d77e-542d-49a6-8004-a9f721b2ce89</data>
+      <data key="d2">4233ea9f-0403-4f41-a766-222fcb65744e</data>
       <data key="d3">dev</data>
       <data key="d4">GPU</data>
       <data key="d9">RTX6000</data>
       <data key="d10">NVIDIA Corporation TU102GL [Quadro RTX 6000/8000] (rev a1)</data>
       <data key="d6">false</data>
     </node>
-    <edge source="157" target="158" label="has">
+    <edge source="235" target="236" label="has">
       <data key="d11">has</data>
     </edge>
   </graph>

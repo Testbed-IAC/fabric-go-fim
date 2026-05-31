@@ -11,38 +11,38 @@
   <key id="d1" for="node" attr.name="Class" attr.type="string"/>
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
-    <node id="88" labels=":GraphNode:NetworkNode">
-      <data key="d0">31649395-9dd4-4065-9dda-8c5afb4aa713</data>
+    <node id="166" labels=":GraphNode:NetworkNode">
+      <data key="d0">286b435a-c924-472e-b735-be5450ef0751</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">2984feb9-b58b-40e9-9db6-ef8860bbcb13</data>
+      <data key="d2">67f2dff6-11b9-4a32-9af9-3ee1843a74ed</data>
       <data key="d3">ESnet-DTN</data>
       <data key="d4">Facility</data>
       <data key="d5">false</data>
       <data key="d6">RENC</data>
     </node>
-    <node id="89" labels=":GraphNode:NetworkService">
-      <data key="d0">31649395-9dd4-4065-9dda-8c5afb4aa713</data>
+    <node id="167" labels=":GraphNode:NetworkService">
+      <data key="d0">286b435a-c924-472e-b735-be5450ef0751</data>
       <data key="d1">NetworkService</data>
-      <data key="d2">9bf64622-836f-472c-aa2d-7f81e5c2d84b</data>
+      <data key="d2">b0a02aa2-2fd4-4a97-8997-a5bc5b35cfcd</data>
       <data key="d3">ESnet-DTN-ns</data>
       <data key="d4">VLAN</data>
       <data key="d7">{"vlan": "100"}</data>
       <data key="d5">false</data>
       <data key="d8">L2</data>
     </node>
-    <node id="90" labels=":GraphNode:ConnectionPoint">
-      <data key="d0">31649395-9dd4-4065-9dda-8c5afb4aa713</data>
+    <node id="168" labels=":GraphNode:ConnectionPoint">
+      <data key="d0">286b435a-c924-472e-b735-be5450ef0751</data>
       <data key="d1">ConnectionPoint</data>
-      <data key="d2">2b50df9c-f4f2-48f9-9243-9d685c40b505</data>
+      <data key="d2">4a0ae847-5d49-4342-a17e-0b6ade43cbc7</data>
       <data key="d3">ESnet-DTN-int</data>
       <data key="d4">FacilityPort</data>
       <data key="d9">{"bw": 10}</data>
       <data key="d5">false</data>
     </node>
-    <edge source="88" target="89" label="has">
+    <edge source="166" target="167" label="has">
       <data key="d10">has</data>
     </edge>
-    <edge source="89" target="90" label="connects">
+    <edge source="167" target="168" label="connects">
       <data key="d10">connects</data>
     </edge>
   </graph>

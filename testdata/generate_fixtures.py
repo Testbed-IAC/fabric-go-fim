@@ -20,7 +20,7 @@ import traceback
 from pathlib import Path
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
-TOTAL_FIXTURES = 28  # 15 patterns + 13 catalog models
+TOTAL_FIXTURES = 35  # 21 patterns + 14 catalog models
 
 # ---------------------------------------------------------------------------
 # Dependency bootstrap
@@ -287,6 +287,78 @@ def build_fabnetv6(ET, Capacities, ComponentType, ServiceType, **_):
     return _serialize(t)
 
 
+def _two_shared_nic_service(ET, Capacities, ComponentType, ServiceType,
+                            *, name, nstype, site_a, site_b):
+    """Build a topology with two SharedNIC-backed VMs joined by one service."""
+    t = ET()
+    vm1 = t.add_node(
+        name="vm1", site=site_a,
+        capacities=Capacities(core=2, ram=8, disk=10),
+        image_ref="default_rocky_9", image_type="qcow2",
+    )
+    vm2 = t.add_node(
+        name="vm2", site=site_b,
+        capacities=Capacities(core=2, ram=8, disk=10),
+        image_ref="default_rocky_9", image_type="qcow2",
+    )
+    c1 = vm1.add_component(ctype=ComponentType.SharedNIC, model="ConnectX-6", name="nic1")
+    c2 = vm2.add_component(ctype=ComponentType.SharedNIC, model="ConnectX-6", name="nic1")
+    t.add_network_service(
+        name=name,
+        nstype=getattr(ServiceType, nstype),
+        interfaces=[_iface(c1), _iface(c2)],
+    )
+    return _serialize(t)
+
+
+def build_fabnetv4_ext(ET, Capacities, ComponentType, ServiceType, **_):
+    # FABNetv4Ext — externally-stitched L3 IPv4 service, single site.
+    return _two_shared_nic_service(
+        ET, Capacities, ComponentType, ServiceType,
+        name="v4ext", nstype="FABNetv4Ext", site_a="RENC", site_b="RENC",
+    )
+
+
+def build_fabnetv6_ext(ET, Capacities, ComponentType, ServiceType, **_):
+    # FABNetv6Ext — externally-stitched L3 IPv6 service, single site.
+    return _two_shared_nic_service(
+        ET, Capacities, ComponentType, ServiceType,
+        name="v6ext", nstype="FABNetv6Ext", site_a="RENC", site_b="RENC",
+    )
+
+
+def build_l3vpn(ET, Capacities, ComponentType, ServiceType, **_):
+    # L3VPN — multi-site layer-3 VPN.
+    return _two_shared_nic_service(
+        ET, Capacities, ComponentType, ServiceType,
+        name="l3vpn1", nstype="L3VPN", site_a="RENC", site_b="UKY",
+    )
+
+
+def build_l2multisite(ET, Capacities, ComponentType, ServiceType, **_):
+    # L2Multisite — multi-site layer-2 service.
+    return _two_shared_nic_service(
+        ET, Capacities, ComponentType, ServiceType,
+        name="l2ms1", nstype="L2Multisite", site_a="RENC", site_b="UKY",
+    )
+
+
+def build_mpls(ET, Capacities, ComponentType, ServiceType, **_):
+    # MPLS — MPLS tunnel service, single site.
+    return _two_shared_nic_service(
+        ET, Capacities, ComponentType, ServiceType,
+        name="mpls1", nstype="MPLS", site_a="RENC", site_b="RENC",
+    )
+
+
+def build_vlan_service(ET, Capacities, ComponentType, ServiceType, **_):
+    # VLAN — VLAN-terminated service, single site.
+    return _two_shared_nic_service(
+        ET, Capacities, ComponentType, ServiceType,
+        name="vlan1", nstype="VLAN", site_a="RENC", site_b="RENC",
+    )
+
+
 def build_facility_port(ET, Capacities, Labels, **_):
     t = ET()
     t.add_facility(
@@ -383,6 +455,7 @@ CATALOG_MODELS = [
     ("GPU",        "A30",                "catalog_gpu_a30"),
     ("GPU",        "A40",                "catalog_gpu_a40"),
     ("NVME",       "P4510",              "catalog_nvme_p4510"),
+    ("Storage",    "NAS",                "catalog_storage_nas"),
     ("FPGA",       "Xilinx-U280",        "catalog_fpga_u280"),
     ("FPGA",       "Xilinx-SN1022",      "catalog_fpga_sn1022"),
 ]
@@ -489,6 +562,12 @@ PATTERNS = [
     ("l2ptp",           build_l2ptp),
     ("fabnetv4",        build_fabnetv4),
     ("fabnetv6",        build_fabnetv6),
+    ("fabnetv4_ext",    build_fabnetv4_ext),
+    ("fabnetv6_ext",    build_fabnetv6_ext),
+    ("l3vpn",           build_l3vpn),
+    ("l2multisite",     build_l2multisite),
+    ("mpls",            build_mpls),
+    ("vlan",            build_vlan_service),
     ("facility_port",   build_facility_port),
     ("switch_node",     build_switch_node),
     ("port_mirror",     build_port_mirror),
