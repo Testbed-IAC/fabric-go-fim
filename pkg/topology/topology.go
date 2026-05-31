@@ -214,6 +214,7 @@ func (t *Topology) AddPortMirrorService(opts PortMirrorOpts) (*NetworkService, e
 		Type:            sliver.ServiceTypePortMirror,
 		NodeID:          opts.NodeID,
 		Interfaces:      []*Interface{opts.ToInterface},
+		Labels:          opts.Labels,
 		Site:            site,
 		MirrorPort:      opts.FromInterfaceName,
 		MirrorVLAN:      opts.FromInterfaceVLAN,

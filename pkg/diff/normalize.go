@@ -25,6 +25,16 @@ var ignoredDiffProps = map[string]struct{}{
 	sliver.PropLayoutData:          {},
 }
 
+var computedDiffProps = map[string]struct{}{
+	sliver.PropMgmtIP:              {},
+	sliver.PropReservationInfo:     {},
+	sliver.PropCapacityAllocations: {},
+	sliver.PropLabelAllocations:    {},
+	sliver.PropMaintenanceInfo:     {},
+	sliver.PropMeasurementData:     {},
+	sliver.PropLayoutData:          {},
+}
+
 // NormalizeGraph returns a semantic, deterministic copy of g for topology
 // drift comparison. Generated IDs and runtime-only properties are removed from
 // comparison state, JSON-valued properties are canonicalized, and nodes and
@@ -120,6 +130,25 @@ func ignoreDiffProp(key string) bool {
 		strings.Contains(lower, "sliver_id") ||
 		strings.Contains(lower, "slicestate") ||
 		strings.Contains(lower, "slice_state")
+}
+
+func categoryForField(field string) FieldCategory {
+	for key := range computedDiffProps {
+		if strings.HasSuffix(field, "."+key) {
+			return FieldCategoryComputed
+		}
+	}
+	lower := strings.ToLower(field)
+	if strings.Contains(lower, "allocation") ||
+		strings.Contains(lower, "reservation") ||
+		strings.Contains(lower, "management_ip") ||
+		strings.Contains(lower, "mgmtip") ||
+		strings.Contains(lower, "sliver") ||
+		strings.Contains(lower, "maintenance") ||
+		strings.Contains(lower, "measurement") {
+		return FieldCategoryComputed
+	}
+	return FieldCategoryUserIntent
 }
 
 func normalizedNodeID(name, class string, used map[string]int) string {

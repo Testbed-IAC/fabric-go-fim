@@ -3,6 +3,7 @@ package catalog
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -74,13 +75,22 @@ func (c *ResourcesClient) GetResourcesSummary(ctx context.Context, opts Resource
 	if err != nil {
 		return nil, fmt.Errorf("%w: fetching resources summary: %w", ErrCatalogLoad, err)
 	}
-	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		if err := resp.Body.Close(); err != nil {
+			return nil, fmt.Errorf("%w: closing resources summary response: %w", ErrCatalogLoad, err)
+		}
 		return nil, fmt.Errorf("%w: fetching resources summary returned %s", ErrCatalogLoad, resp.Status)
 	}
 	summary, err := DecodeResourcesSummary(resp.Body)
+	closeErr := resp.Body.Close()
 	if err != nil {
+		if closeErr != nil {
+			return nil, fmt.Errorf("decoding resources summary and closing response: %w", errors.Join(err, closeErr))
+		}
 		return nil, err
+	}
+	if closeErr != nil {
+		return nil, fmt.Errorf("%w: closing resources summary response: %w", ErrCatalogLoad, closeErr)
 	}
 	return summary, nil
 }

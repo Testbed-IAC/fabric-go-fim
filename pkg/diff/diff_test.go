@@ -133,6 +133,56 @@ func TestDiffGraphsIgnoresUUIDAndRuntimeDifferences(t *testing.T) {
 	}
 }
 
+func TestDiffGraphsIgnoresAllocationOnlyDifferences(t *testing.T) {
+	expected := testGraph(t, "expected", testNode{
+		id:    "expected-node-id",
+		name:  "vm1",
+		class: sliver.ClassNetworkNode,
+		typ:   string(sliver.NodeTypeVM),
+		props: map[string]string{
+			sliver.PropCapacityAllocations: `{"core":2,"ram":8}`,
+			sliver.PropLabelAllocations:    `{"ip":"192.0.2.10","mac":"02:00:00:00:00:01","vlan":"100"}`,
+		},
+	})
+	actual := testGraph(t, "actual", testNode{
+		id:    "actual-node-id",
+		name:  "vm1",
+		class: sliver.ClassNetworkNode,
+		typ:   string(sliver.NodeTypeVM),
+		props: map[string]string{
+			sliver.PropCapacityAllocations: `{"core":4,"ram":16}`,
+			sliver.PropLabelAllocations:    `{"ip":"192.0.2.20","mac":"02:00:00:00:00:02","vlan":"200"}`,
+		},
+	})
+
+	diff := DiffGraphs(expected, actual)
+
+	if diff.HasUserIntentChanges() {
+		t.Fatalf("user-intent diff = %+v, want allocation-only differences ignored", diff.UserIntentDiagnostics())
+	}
+	if !diff.Empty() {
+		t.Fatalf("diff = %+v, want allocation-only differences ignored", diff)
+	}
+}
+
+func TestDiffGraphsClassifiesUserIntentDrift(t *testing.T) {
+	expected := testGraph(t, "expected", testNode{id: "node-a", name: "vm1", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM), props: map[string]string{sliver.PropLabels: `{"instance_parent":"renc-w1"}`}})
+	actual := testGraph(t, "actual", testNode{id: "node-a2", name: "vm1", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM), props: map[string]string{sliver.PropLabels: `{"instance_parent":"uky-w1"}`}})
+
+	diff := DiffGraphs(expected, actual)
+
+	classified := diff.ClassifiedDiagnostics()
+	if len(classified) != 1 {
+		t.Fatalf("classified diagnostics = %+v, want one", classified)
+	}
+	if classified[0].Category != FieldCategoryUserIntent {
+		t.Fatalf("category = %q, want user_intent", classified[0].Category)
+	}
+	if len(diff.UserIntentDiagnostics()) != 1 || !diff.HasUserIntentChanges() {
+		t.Fatalf("user-intent diagnostics = %+v, want one", diff.UserIntentDiagnostics())
+	}
+}
+
 func TestDiffGraphsEdgeDrift(t *testing.T) {
 	expected := testGraph(t, "expected",
 		testNode{id: "node-a", name: "vm1", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM)},

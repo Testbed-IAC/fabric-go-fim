@@ -95,6 +95,7 @@ func (n *Node) AddComponent(opts ComponentOpts) (*Component, error) {
 	if err != nil {
 		return nil, err
 	}
+	generated.Component.Labels = opts.Labels
 	componentProps, err := generated.Component.ToProps()
 	if err != nil {
 		return nil, err
@@ -399,6 +400,27 @@ func (i *Interface) Sliver() (*sliver.InterfaceSliver, error) {
 	return &out, nil
 }
 
+// SetLabels merges labels into this interface while preserving generated labels.
+func (i *Interface) SetLabels(labels *sliver.Labels) error {
+	if labels == nil || labels.Empty() {
+		return nil
+	}
+	current, err := i.Sliver()
+	if err != nil {
+		return err
+	}
+	merged := mergeLabels(current.Labels, labels)
+	current.Labels = merged
+	props, err := current.ToProps()
+	if err != nil {
+		return err
+	}
+	if err := i.t.g.UpdateNode(i.id, props); err != nil {
+		return fmt.Errorf("updating interface labels: %w", err)
+	}
+	return nil
+}
+
 // AddChildInterface adds a VLAN-tagged SubInterface under a DedicatedPort.
 func (i *Interface) AddChildInterface(opts InterfaceOpts) (*Interface, error) {
 	if i.Type() != sliver.InterfaceTypeDedicatedPort {
@@ -500,6 +522,81 @@ func facadeProps(t *Topology, id string) map[string]string {
 		return map[string]string{}
 	}
 	return node.Props
+}
+
+func mergeLabels(base, overlay *sliver.Labels) *sliver.Labels {
+	if base == nil {
+		copyLabels := *overlay
+		return &copyLabels
+	}
+	merged := *base
+	if overlay.BDF != "" {
+		merged.BDF = overlay.BDF
+	}
+	if overlay.MAC != "" {
+		merged.MAC = overlay.MAC
+	}
+	if overlay.IPv4 != "" {
+		merged.IPv4 = overlay.IPv4
+	}
+	if overlay.IPv4Range != "" {
+		merged.IPv4Range = overlay.IPv4Range
+	}
+	if overlay.IPv4Subnet != "" {
+		merged.IPv4Subnet = overlay.IPv4Subnet
+	}
+	if overlay.IPv6 != "" {
+		merged.IPv6 = overlay.IPv6
+	}
+	if overlay.IPv6Range != "" {
+		merged.IPv6Range = overlay.IPv6Range
+	}
+	if overlay.IPv6Subnet != "" {
+		merged.IPv6Subnet = overlay.IPv6Subnet
+	}
+	if overlay.VLAN != "" {
+		merged.VLAN = overlay.VLAN
+	}
+	if overlay.VLANRange != "" {
+		merged.VLANRange = overlay.VLANRange
+	}
+	if overlay.InnerVLAN != "" {
+		merged.InnerVLAN = overlay.InnerVLAN
+	}
+	if overlay.ASN != "" {
+		merged.ASN = overlay.ASN
+	}
+	if overlay.Instance != "" {
+		merged.Instance = overlay.Instance
+	}
+	if overlay.InstanceParent != "" {
+		merged.InstanceParent = overlay.InstanceParent
+	}
+	if overlay.LocalName != "" {
+		merged.LocalName = overlay.LocalName
+	}
+	if overlay.LocalType != "" {
+		merged.LocalType = overlay.LocalType
+	}
+	if overlay.DeviceName != "" {
+		merged.DeviceName = overlay.DeviceName
+	}
+	if overlay.BGPKey != "" {
+		merged.BGPKey = overlay.BGPKey
+	}
+	if overlay.AccountID != "" {
+		merged.AccountID = overlay.AccountID
+	}
+	if overlay.Region != "" {
+		merged.Region = overlay.Region
+	}
+	if overlay.USBID != "" {
+		merged.USBID = overlay.USBID
+	}
+	if overlay.NUMA != nil {
+		merged.NUMA = overlay.NUMA
+	}
+	return &merged
 }
 
 func (i *Interface) parentService() *NetworkService {

@@ -338,9 +338,11 @@ func TestGolden_Structural_SubInterface_VLAN(t *testing.T) {
 	if !ok {
 		t.Fatal("vm1 not found")
 	}
+	found := false
 	for _, comp := range vm.Components() {
 		for _, port := range comp.InterfaceList() {
 			for _, child := range port.ChildInterfaces() {
+				found = true
 				sl, err := child.Sliver()
 				if err != nil {
 					t.Fatalf("Sliver: %v", err)
@@ -348,11 +350,12 @@ func TestGolden_Structural_SubInterface_VLAN(t *testing.T) {
 				if sl.Labels == nil || sl.Labels.VLAN == "" {
 					t.Errorf("SubInterface %q must carry VLAN label", child.Name())
 				}
-				return
 			}
 		}
 	}
-	t.Error("no SubInterface found under vm1 components")
+	if !found {
+		t.Error("no SubInterface found under vm1 components")
+	}
 }
 
 // TestGolden_Structural_ExplicitLink_ConnectsTwo verifies that the explicit

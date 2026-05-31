@@ -42,6 +42,7 @@ type ComponentOpts struct {
 	NodeID           string
 	NSNodeID         string
 	InterfaceNodeIDs map[string]string
+	Labels           *sliver.Labels
 }
 
 // InterfaceOpts configures interface creation on a NetworkService or Component port.
@@ -148,6 +149,7 @@ type PortMirrorOpts struct {
 	ToInterface       *Interface
 	Direction         sliver.MirrorDirection
 	Site              string
+	Labels            *sliver.Labels
 }
 
 // LinkOpts configures a call to Topology.AddLink.

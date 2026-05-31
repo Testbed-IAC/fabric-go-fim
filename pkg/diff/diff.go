@@ -65,6 +65,24 @@ type Diagnostic interface {
 	Suggestion() string
 }
 
+// FieldCategory identifies whether a drift diagnostic represents user intent
+// or expected FABRIC-computed state.
+type FieldCategory string
+
+const (
+	// FieldCategoryUserIntent marks topology fields that come from configuration.
+	FieldCategoryUserIntent FieldCategory = "user_intent"
+	// FieldCategoryComputed marks topology fields assigned by FABRIC at runtime.
+	FieldCategoryComputed FieldCategory = "computed"
+)
+
+// ClassifiedDiagnostic couples a drift diagnostic with its reconciliation
+// category.
+type ClassifiedDiagnostic struct {
+	Diagnostic Diagnostic
+	Category   FieldCategory
+}
+
 // DiffGraphs compares expected and actual graphs by semantic topology intent,
 // ignoring generated IDs, GraphML-local IDs, and runtime-only FABRIC fields.
 func DiffGraphs(expected, actual *graph.Graph) GraphDiff {
@@ -182,6 +200,36 @@ func (d GraphDiff) Diagnostics() []Diagnostic {
 		return out[i].Error() < out[j].Error()
 	})
 	return out
+}
+
+// ClassifiedDiagnostics returns diagnostics with field categories used for
+// reconciliation decisions.
+func (d GraphDiff) ClassifiedDiagnostics() []ClassifiedDiagnostic {
+	diagnostics := d.Diagnostics()
+	out := make([]ClassifiedDiagnostic, 0, len(diagnostics))
+	for _, diagnostic := range diagnostics {
+		out = append(out, ClassifiedDiagnostic{Diagnostic: diagnostic, Category: categoryForField(diagnostic.Field())})
+	}
+	return out
+}
+
+// UserIntentDiagnostics returns only diagnostics for configuration-owned
+// topology fields.
+func (d GraphDiff) UserIntentDiagnostics() []Diagnostic {
+	classified := d.ClassifiedDiagnostics()
+	out := make([]Diagnostic, 0, len(classified))
+	for _, diagnostic := range classified {
+		if diagnostic.Category == FieldCategoryUserIntent {
+			out = append(out, diagnostic.Diagnostic)
+		}
+	}
+	return out
+}
+
+// HasUserIntentChanges reports whether the graph diff contains configuration
+// drift that should be shown to Terraform users.
+func (d GraphDiff) HasUserIntentChanges() bool {
+	return len(d.UserIntentDiagnostics()) > 0
 }
 
 func diffNormalizedGraphs(expected, actual *graph.Graph) GraphDiff {

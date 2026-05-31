@@ -24,6 +24,21 @@ type PropertyChange = diff.PropertyChange
 // EdgeDiff describes an edge that exists on only one side of a graph diff.
 type EdgeDiff = diff.EdgeDiff
 
+// FieldCategory identifies whether a drift diagnostic represents user intent
+// or expected FABRIC-computed state.
+type FieldCategory = diff.FieldCategory
+
+const (
+	// FieldCategoryUserIntent marks topology fields that come from configuration.
+	FieldCategoryUserIntent = diff.FieldCategoryUserIntent
+	// FieldCategoryComputed marks topology fields assigned by FABRIC at runtime.
+	FieldCategoryComputed = diff.FieldCategoryComputed
+)
+
+// ClassifiedDiagnostic couples a drift diagnostic with its reconciliation
+// category.
+type ClassifiedDiagnostic = diff.ClassifiedDiagnostic
+
 // TopologyDiff wraps graph drift in a topology-facing type that can later grow
 // Terraform-specific grouping without changing graph-level diff behavior.
 type TopologyDiff struct {
@@ -80,6 +95,12 @@ func (d TopologyDiff) HasChanges() bool {
 	return d.RawGraph.HasChanges()
 }
 
+// HasUserIntentChanges reports whether the topology diff contains
+// configuration-owned drift.
+func (d TopologyDiff) HasUserIntentChanges() bool {
+	return d.RawGraph.HasUserIntentChanges()
+}
+
 // Summary returns the graph-level summary for this topology diff.
 func (d TopologyDiff) Summary() string {
 	return d.RawGraph.Summary()
@@ -88,6 +109,23 @@ func (d TopologyDiff) Summary() string {
 // Diagnostics returns graph-level diagnostics for this topology diff.
 func (d TopologyDiff) Diagnostics() []Diagnostic {
 	diffDiagnostics := d.RawGraph.Diagnostics()
+	out := make([]Diagnostic, 0, len(diffDiagnostics))
+	for _, diag := range diffDiagnostics {
+		out = append(out, diag)
+	}
+	return out
+}
+
+// ClassifiedDiagnostics returns topology drift diagnostics with field
+// categories used for reconciliation decisions.
+func (d TopologyDiff) ClassifiedDiagnostics() []ClassifiedDiagnostic {
+	return d.RawGraph.ClassifiedDiagnostics()
+}
+
+// UserIntentDiagnostics returns only diagnostics for configuration-owned
+// topology fields.
+func (d TopologyDiff) UserIntentDiagnostics() []Diagnostic {
+	diffDiagnostics := d.RawGraph.UserIntentDiagnostics()
 	out := make([]Diagnostic, 0, len(diffDiagnostics))
 	for _, diag := range diffDiagnostics {
 		out = append(out, diag)

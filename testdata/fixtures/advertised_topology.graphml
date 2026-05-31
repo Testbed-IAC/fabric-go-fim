@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <key id="class" for="node" attr.name="Class" attr.type="string"></key>
+  <key id="name" for="node" attr.name="Name" attr.type="string"></key>
+  <key id="nodeid" for="node" attr.name="NodeID" attr.type="string"></key>
+  <key id="graphid" for="node" attr.name="GraphID" attr.type="string"></key>
+  <key id="type" for="node" attr.name="Type" attr.type="string"></key>
+  <key id="site" for="node" attr.name="Site" attr.type="string"></key>
+  <key id="model" for="node" attr.name="Model" attr.type="string"></key>
+  <key id="caps" for="node" attr.name="Capacities" attr.type="string"></key>
+  <key id="allocs" for="node" attr.name="CapacityAllocations" attr.type="string"></key>
+  <key id="flags" for="node" attr.name="Flags" attr.type="string"></key>
+  <key id="labels" for="node" attr.name="Labels" attr.type="string"></key>
+  <key id="layer" for="node" attr.name="Layer" attr.type="string"></key>
+  <key id="site1" for="node" attr.name="Site1" attr.type="string"></key>
+  <key id="site2" for="node" attr.name="Site2" attr.type="string"></key>
+  <key id="switch" for="node" attr.name="Switch" attr.type="string"></key>
+  <key id="edgeclass" for="edge" attr.name="Class" attr.type="string"></key>
+  <graph edgedefault="directed">
+    <node id="site-renc">
+      <data key="class">NetworkNode</data>
+      <data key="name">RENC</data>
+      <data key="nodeid">site-renc</data>
+      <data key="graphid">advertised</data>
+      <data key="type">Site</data>
+      <data key="caps">{"core":100,"ram":200,"disk":300}</data>
+      <data key="allocs">{"core":10,"ram":20,"disk":30}</data>
+      <data key="flags">{"ipv4_management":true,"ptp":true}</data>
+    </node>
+    <node id="host-renc-w1">
+      <data key="class">NetworkNode</data>
+      <data key="name">renc-w1</data>
+      <data key="nodeid">host-renc-w1</data>
+      <data key="graphid">advertised</data>
+      <data key="type">Server</data>
+      <data key="site">RENC</data>
+      <data key="caps">{"core":50,"ram":100,"disk":150}</data>
+      <data key="allocs">{"core":5,"ram":10,"disk":15}</data>
+    </node>
+    <node id="component-gpu">
+      <data key="class">Component</data>
+      <data key="name">gpu-a30</data>
+      <data key="nodeid">component-gpu</data>
+      <data key="graphid">advertised</data>
+      <data key="type">GPU</data>
+      <data key="model">A30</data>
+      <data key="caps">{"unit":2}</data>
+      <data key="allocs">{"unit":1}</data>
+    </node>
+    <node id="facility-port">
+      <data key="class">ConnectionPoint</data>
+      <data key="name">RENC-ESnet</data>
+      <data key="nodeid">facility-port</data>
+      <data key="graphid">advertised</data>
+      <data key="type">FacilityPort</data>
+      <data key="site">RENC</data>
+      <data key="switch">renc-data-sw</data>
+      <data key="labels">{"vlan_range":"100-200"}</data>
+      <data key="caps">{"bw":100}</data>
+    </node>
+    <node id="link-renc-uky">
+      <data key="class">Link</data>
+      <data key="name">RENC-UKY</data>
+      <data key="nodeid">link-renc-uky</data>
+      <data key="graphid">advertised</data>
+      <data key="type">L2Path</data>
+      <data key="layer">L2</data>
+      <data key="site1">RENC</data>
+      <data key="site2">UKY</data>
+      <data key="caps">{"bw":100}</data>
+    </node>
+    <edge source="site-renc" target="host-renc-w1">
+      <data key="edgeclass">has</data>
+    </edge>
+    <edge source="host-renc-w1" target="component-gpu">
+      <data key="edgeclass">has</data>
+    </edge>
+  </graph>
+</graphml>

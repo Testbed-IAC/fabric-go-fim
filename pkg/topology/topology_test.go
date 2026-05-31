@@ -98,6 +98,43 @@ func TestValidateNetworkServiceIsSideEffectFree(t *testing.T) {
 	}
 }
 
+func TestAddComponentAppliesLabels(t *testing.T) {
+	t.Parallel()
+
+	topo := NewWithID("graph-id")
+	vm := addVM(t, topo, "vm1", "RENC")
+	component := addComponent(t, vm, ComponentOpts{
+		Name:   "gpu1",
+		Type:   sliver.ComponentTypeGPU,
+		Model:  "RTX6000",
+		Labels: &sliver.Labels{BDF: "0000:5e:00.0"},
+	})
+	componentSliver, err := component.Sliver()
+	if err != nil {
+		t.Fatalf("component.Sliver: %v", err)
+	}
+	if componentSliver.Labels == nil || componentSliver.Labels.BDF != "0000:5e:00.0" {
+		t.Fatalf("component labels = %+v, want bdf label", componentSliver.Labels)
+	}
+}
+
+func TestInterfaceSetLabelsPreservesGeneratedLabels(t *testing.T) {
+	t.Parallel()
+
+	topo := NewWithID("graph-id")
+	ifaces := twoSharedInterfaces(t, topo, "RENC", "RENC")
+	if err := ifaces[0].SetLabels(&sliver.Labels{VLAN: "100"}); err != nil {
+		t.Fatalf("SetLabels: %v", err)
+	}
+	ifaceSliver, err := ifaces[0].Sliver()
+	if err != nil {
+		t.Fatalf("iface.Sliver: %v", err)
+	}
+	if ifaceSliver.Labels == nil || ifaceSliver.Labels.LocalName != "p1" || ifaceSliver.Labels.VLAN != "100" {
+		t.Fatalf("interface labels = %+v, want local_name p1 and vlan 100", ifaceSliver.Labels)
+	}
+}
+
 func buildBareVM(t *testing.T, topo *Topology) {
 	t.Helper()
 	addVM(t, topo, "vm1", "RENC")
