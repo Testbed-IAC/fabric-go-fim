@@ -112,6 +112,9 @@ func TestValidation(t *testing.T) {
 	if err := (Labels{VLAN: "5000"}).Validate(); !errors.Is(err, ErrInvalidValue) {
 		t.Fatalf("invalid VLAN error = %v, want ErrInvalidValue", err)
 	}
+	if err := (Labels{BGPKey: "abcdef"}).Validate(); !errors.Is(err, ErrBGPKeyRequiresASN) {
+		t.Fatalf("missing ASN error = %v, want ErrBGPKeyRequiresASN", err)
+	}
 	if err := (Tags{"ok", "not ok"}).Validate(); !errors.Is(err, ErrInvalidValue) {
 		t.Fatalf("invalid tag error = %v, want ErrInvalidValue", err)
 	}

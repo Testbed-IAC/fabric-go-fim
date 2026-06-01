@@ -143,6 +143,9 @@ func (l Labels) Validate() error {
 	if err := checkPattern("bgp_key", l.BGPKey, bgpKeyPattern); err != nil {
 		return err
 	}
+	if l.BGPKey != "" && l.ASN == "" {
+		return fmt.Errorf("%w: %w", ErrInvalidValue, ErrBGPKeyRequiresASN)
+	}
 	if err := checkPattern("account_id", l.AccountID, accountIDPattern); err != nil {
 		return err
 	}

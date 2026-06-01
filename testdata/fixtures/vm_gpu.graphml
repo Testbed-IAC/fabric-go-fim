@@ -13,9 +13,9 @@
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
     <node id="11" labels=":GraphNode:NetworkNode">
-      <data key="d0">27bb6a24-f67c-4f89-80d8-2183342d9bd2</data>
+      <data key="d0">cb381604-36e5-482d-a42c-43fcc00e58b5</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">b62f957e-2553-4388-9503-e1ac272f0483</data>
+      <data key="d2">4daeebcc-431e-4749-b0cc-385f62ec24c6</data>
       <data key="d3">vm1</data>
       <data key="d4">VM</data>
       <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
@@ -24,9 +24,9 @@
       <data key="d8">RENC</data>
     </node>
     <node id="12" labels=":GraphNode:Component">
-      <data key="d0">27bb6a24-f67c-4f89-80d8-2183342d9bd2</data>
+      <data key="d0">cb381604-36e5-482d-a42c-43fcc00e58b5</data>
       <data key="d1">Component</data>
-      <data key="d2">b3257639-4687-462c-adf2-80851f3f9622</data>
+      <data key="d2">0b07cde0-637b-4305-b748-b723ee88d2b4</data>
       <data key="d3">gpu1</data>
       <data key="d4">GPU</data>
       <data key="d9">RTX6000</data>

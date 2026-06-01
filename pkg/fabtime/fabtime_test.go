@@ -57,3 +57,14 @@ func TestRoundTrip(t *testing.T) {
 		t.Fatalf("round trip = %s, want %s", roundTrip, tm)
 	}
 }
+
+func TestCanonical(t *testing.T) {
+	t.Parallel()
+	got, err := Canonical("2026-05-30T19:04:54Z")
+	if err != nil {
+		t.Fatalf("Canonical: %v", err)
+	}
+	if want := "2026-05-30 19:04:54 +00:00"; got != want {
+		t.Fatalf("Canonical = %q, want %q", got, want)
+	}
+}

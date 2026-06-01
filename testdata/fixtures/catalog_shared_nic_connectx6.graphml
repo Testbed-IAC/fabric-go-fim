@@ -15,9 +15,9 @@
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
     <node id="204" labels=":GraphNode:NetworkNode">
-      <data key="d0">529fa712-b502-4734-bbf1-75d5f4635a71</data>
+      <data key="d0">9f69a7b7-6908-4b87-b389-0358583fe640</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">36177868-21ce-4f13-ab9c-2e608811e8e8</data>
+      <data key="d2">60fe15d6-82e4-48f1-a5a5-e2fa71c99ee3</data>
       <data key="d3">vm1</data>
       <data key="d4">VM</data>
       <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
@@ -26,9 +26,9 @@
       <data key="d8">RENC</data>
     </node>
     <node id="205" labels=":GraphNode:Component">
-      <data key="d0">529fa712-b502-4734-bbf1-75d5f4635a71</data>
+      <data key="d0">9f69a7b7-6908-4b87-b389-0358583fe640</data>
       <data key="d1">Component</data>
-      <data key="d2">30309767-a635-489a-9e20-7c8d8c2e08ca</data>
+      <data key="d2">c3fef533-67d1-4ee9-9359-abc16c6fa9d7</data>
       <data key="d3">dev</data>
       <data key="d4">SharedNIC</data>
       <data key="d9">ConnectX-6</data>
@@ -36,18 +36,18 @@
       <data key="d6">false</data>
     </node>
     <node id="206" labels=":GraphNode:NetworkService">
-      <data key="d0">529fa712-b502-4734-bbf1-75d5f4635a71</data>
+      <data key="d0">9f69a7b7-6908-4b87-b389-0358583fe640</data>
       <data key="d1">NetworkService</data>
-      <data key="d2">7136d23d-908c-4a0b-beef-69fa474050a7</data>
+      <data key="d2">650b41a5-44ca-4a39-a5dc-3b4c8fbcc7c1</data>
       <data key="d3">vm1-dev-l2ovs</data>
       <data key="d4">OVS</data>
       <data key="d6">false</data>
       <data key="d11">L2</data>
     </node>
     <node id="207" labels=":GraphNode:ConnectionPoint">
-      <data key="d0">529fa712-b502-4734-bbf1-75d5f4635a71</data>
+      <data key="d0">9f69a7b7-6908-4b87-b389-0358583fe640</data>
       <data key="d1">ConnectionPoint</data>
-      <data key="d2">e4f57460-f627-48dc-8b69-cd55a973e235</data>
+      <data key="d2">c8366481-6daf-4449-806c-8b15d71a7a1e</data>
       <data key="d3">dev-p1</data>
       <data key="d4">SharedPort</data>
       <data key="d5">{"unit": 1}</data>

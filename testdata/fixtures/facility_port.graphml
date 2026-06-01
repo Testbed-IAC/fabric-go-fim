@@ -12,18 +12,18 @@
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
     <node id="166" labels=":GraphNode:NetworkNode">
-      <data key="d0">286b435a-c924-472e-b735-be5450ef0751</data>
+      <data key="d0">4a9952e1-ed3c-4323-a4df-dfae152fdff8</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">67f2dff6-11b9-4a32-9af9-3ee1843a74ed</data>
+      <data key="d2">5d1360f4-e48a-4590-ad82-1bc913f150d4</data>
       <data key="d3">ESnet-DTN</data>
       <data key="d4">Facility</data>
       <data key="d5">false</data>
       <data key="d6">RENC</data>
     </node>
     <node id="167" labels=":GraphNode:NetworkService">
-      <data key="d0">286b435a-c924-472e-b735-be5450ef0751</data>
+      <data key="d0">4a9952e1-ed3c-4323-a4df-dfae152fdff8</data>
       <data key="d1">NetworkService</data>
-      <data key="d2">b0a02aa2-2fd4-4a97-8997-a5bc5b35cfcd</data>
+      <data key="d2">8f1f84d6-d6ed-4ab3-bcbc-b39a5ff2ba03</data>
       <data key="d3">ESnet-DTN-ns</data>
       <data key="d4">VLAN</data>
       <data key="d7">{"vlan": "100"}</data>
@@ -31,9 +31,9 @@
       <data key="d8">L2</data>
     </node>
     <node id="168" labels=":GraphNode:ConnectionPoint">
-      <data key="d0">286b435a-c924-472e-b735-be5450ef0751</data>
+      <data key="d0">4a9952e1-ed3c-4323-a4df-dfae152fdff8</data>
       <data key="d1">ConnectionPoint</data>
-      <data key="d2">4a0ae847-5d49-4342-a17e-0b6ade43cbc7</data>
+      <data key="d2">a1d43dff-a54b-4d94-99ff-4620b7d8e077</data>
       <data key="d3">ESnet-DTN-int</data>
       <data key="d4">FacilityPort</data>
       <data key="d9">{"bw": 10}</data>

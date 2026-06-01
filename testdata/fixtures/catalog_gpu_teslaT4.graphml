@@ -13,9 +13,9 @@
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
     <node id="233" labels=":GraphNode:NetworkNode">
-      <data key="d0">8276ea99-eb2a-4dcf-b169-8fe07844a0f1</data>
+      <data key="d0">417b2bd4-8841-48a7-bc30-a6354b87bebe</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">c21cc978-fabe-4efb-924d-24a752071acd</data>
+      <data key="d2">b1d75a09-61e6-47a9-a68f-937ab67caea1</data>
       <data key="d3">vm1</data>
       <data key="d4">VM</data>
       <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
@@ -24,9 +24,9 @@
       <data key="d8">RENC</data>
     </node>
     <node id="234" labels=":GraphNode:Component">
-      <data key="d0">8276ea99-eb2a-4dcf-b169-8fe07844a0f1</data>
+      <data key="d0">417b2bd4-8841-48a7-bc30-a6354b87bebe</data>
       <data key="d1">Component</data>
-      <data key="d2">fa10ba95-3d0a-4f3e-a156-92fdf12be50d</data>
+      <data key="d2">35ce7d2d-a900-4e22-a71f-f305b6c2b879</data>
       <data key="d3">dev</data>
       <data key="d4">GPU</data>
       <data key="d9">Tesla T4</data>

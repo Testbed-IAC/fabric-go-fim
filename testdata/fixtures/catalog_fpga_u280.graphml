@@ -15,9 +15,9 @@
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
     <node id="245" labels=":GraphNode:NetworkNode">
-      <data key="d0">14dd4286-6416-49c2-8251-7a149a977bb3</data>
+      <data key="d0">476a54e0-3d36-49f1-8a93-903489f16567</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">c5cda839-c2b5-471e-9128-7132e9de4e6a</data>
+      <data key="d2">c58c31b2-2799-4e0f-bfb1-98060e3d6685</data>
       <data key="d3">vm1</data>
       <data key="d4">VM</data>
       <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
@@ -26,9 +26,9 @@
       <data key="d8">RENC</data>
     </node>
     <node id="246" labels=":GraphNode:Component">
-      <data key="d0">14dd4286-6416-49c2-8251-7a149a977bb3</data>
+      <data key="d0">476a54e0-3d36-49f1-8a93-903489f16567</data>
       <data key="d1">Component</data>
-      <data key="d2">1367b30c-2959-409a-b726-4d53aec5b425</data>
+      <data key="d2">ca1a97ab-7205-4049-a670-6a8a0e515ae9</data>
       <data key="d3">dev</data>
       <data key="d4">FPGA</data>
       <data key="d9">Xilinx-U280</data>
@@ -36,18 +36,18 @@
       <data key="d6">false</data>
     </node>
     <node id="247" labels=":GraphNode:NetworkService">
-      <data key="d0">14dd4286-6416-49c2-8251-7a149a977bb3</data>
+      <data key="d0">476a54e0-3d36-49f1-8a93-903489f16567</data>
       <data key="d1">NetworkService</data>
-      <data key="d2">9ccad757-7329-454c-84c3-3c0b436ec855</data>
+      <data key="d2">2f9c1938-12d0-4175-8768-64d349f2fa81</data>
       <data key="d3">vm1-dev-l2p4</data>
       <data key="d4">P4</data>
       <data key="d6">false</data>
       <data key="d11">L2</data>
     </node>
     <node id="248" labels=":GraphNode:ConnectionPoint">
-      <data key="d0">14dd4286-6416-49c2-8251-7a149a977bb3</data>
+      <data key="d0">476a54e0-3d36-49f1-8a93-903489f16567</data>
       <data key="d1">ConnectionPoint</data>
-      <data key="d2">bfc5610f-54c6-48ad-baa4-117ffeacf558</data>
+      <data key="d2">53103d71-6413-4377-ad7d-ef956ef20123</data>
       <data key="d3">dev-p1</data>
       <data key="d4">DedicatedPort</data>
       <data key="d5">{"bw": 100, "unit": 1}</data>
@@ -55,9 +55,9 @@
       <data key="d6">false</data>
     </node>
     <node id="249" labels=":GraphNode:ConnectionPoint">
-      <data key="d0">14dd4286-6416-49c2-8251-7a149a977bb3</data>
+      <data key="d0">476a54e0-3d36-49f1-8a93-903489f16567</data>
       <data key="d1">ConnectionPoint</data>
-      <data key="d2">24d9be3a-d99a-464e-8843-861af61fef5e</data>
+      <data key="d2">8375959d-3eea-4514-804e-0b8dba6f8be1</data>
       <data key="d3">dev-p2</data>
       <data key="d4">DedicatedPort</data>
       <data key="d5">{"bw": 100, "unit": 1}</data>

@@ -10,9 +10,9 @@
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
     <node id="1" labels=":GraphNode:NetworkNode">
-      <data key="d0">973db8ca-6534-470f-86db-a0b04b562437</data>
+      <data key="d0">68a60522-d50c-4385-bf7c-50834d684abe</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">be846710-b643-4677-b3cc-080297eac013</data>
+      <data key="d2">3371f4f2-fd9f-4694-8c14-673a289c2e99</data>
       <data key="d3">vm1</data>
       <data key="d4">VM</data>
       <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>

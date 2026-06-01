@@ -15,9 +15,9 @@
   <key id="d0" for="node" attr.name="GraphID" attr.type="string"/>
   <graph edgedefault="undirected">
     <node id="189" labels=":GraphNode:NetworkNode">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">c4a03498-eba3-4100-8435-f10e032a7e9d</data>
+      <data key="d2">11f1b564-22d3-46f3-9594-a9be726ca420</data>
       <data key="d3">vm1</data>
       <data key="d4">VM</data>
       <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
@@ -26,9 +26,9 @@
       <data key="d8">RENC</data>
     </node>
     <node id="190" labels=":GraphNode:NetworkNode">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">NetworkNode</data>
-      <data key="d2">c3060aaa-a552-4be4-aa2a-48b674ab5a62</data>
+      <data key="d2">16aa3f97-6b0c-4188-96e8-fd9072024f53</data>
       <data key="d3">vm2</data>
       <data key="d4">VM</data>
       <data key="d5">{"core": 2, "disk": 10, "ram": 8}</data>
@@ -37,9 +37,9 @@
       <data key="d8">RENC</data>
     </node>
     <node id="191" labels=":GraphNode:Component">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">Component</data>
-      <data key="d2">51feab1a-770f-4065-a84f-6255fbebaf63</data>
+      <data key="d2">6ed97f16-1813-42bc-91d7-475e52d25ee3</data>
       <data key="d3">snic1</data>
       <data key="d4">SmartNIC</data>
       <data key="d9">ConnectX-6</data>
@@ -47,18 +47,18 @@
       <data key="d6">false</data>
     </node>
     <node id="192" labels=":GraphNode:NetworkService">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">NetworkService</data>
-      <data key="d2">005615d7-3931-49c1-bd19-661abaaa6d66</data>
+      <data key="d2">99eabe70-25b8-4cc5-be37-95225fd3236f</data>
       <data key="d3">vm1-snic1-l2ovs</data>
       <data key="d4">OVS</data>
       <data key="d6">false</data>
       <data key="d11">L2</data>
     </node>
     <node id="193" labels=":GraphNode:ConnectionPoint">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">ConnectionPoint</data>
-      <data key="d2">c5a4c227-3110-4327-b7ed-1484fbe251b0</data>
+      <data key="d2">8acde7a6-1cd7-4969-9481-754e07cef04b</data>
       <data key="d3">snic1-p1</data>
       <data key="d4">DedicatedPort</data>
       <data key="d5">{"bw": 100, "unit": 1}</data>
@@ -66,9 +66,9 @@
       <data key="d6">false</data>
     </node>
     <node id="194" labels=":GraphNode:ConnectionPoint">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">ConnectionPoint</data>
-      <data key="d2">de21a51c-e8ef-4c1c-8c57-6179c234dff1</data>
+      <data key="d2">5f6d295d-4a5f-4ad1-b359-8bcfd99d9029</data>
       <data key="d3">snic1-p2</data>
       <data key="d4">DedicatedPort</data>
       <data key="d5">{"bw": 100, "unit": 1}</data>
@@ -76,9 +76,9 @@
       <data key="d6">false</data>
     </node>
     <node id="195" labels=":GraphNode:Component">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">Component</data>
-      <data key="d2">fe5a922c-16d8-4d0d-95a4-2b7687144117</data>
+      <data key="d2">f78c6542-279d-481d-a72c-67df8e136deb</data>
       <data key="d3">snic1</data>
       <data key="d4">SmartNIC</data>
       <data key="d9">ConnectX-6</data>
@@ -86,18 +86,18 @@
       <data key="d6">false</data>
     </node>
     <node id="196" labels=":GraphNode:NetworkService">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">NetworkService</data>
-      <data key="d2">a2f2c947-35e2-404b-96b6-8acaf2c8a28e</data>
+      <data key="d2">181ceed7-601f-49d3-95a7-59a4cee1a266</data>
       <data key="d3">vm2-snic1-l2ovs</data>
       <data key="d4">OVS</data>
       <data key="d6">false</data>
       <data key="d11">L2</data>
     </node>
     <node id="197" labels=":GraphNode:ConnectionPoint">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">ConnectionPoint</data>
-      <data key="d2">f3048643-ff71-4215-8563-ff41d511fb39</data>
+      <data key="d2">6e02c8dd-dfd6-426c-a2dd-7e896f1ace30</data>
       <data key="d3">snic1-p1</data>
       <data key="d4">DedicatedPort</data>
       <data key="d5">{"bw": 100, "unit": 1}</data>
@@ -105,9 +105,9 @@
       <data key="d6">false</data>
     </node>
     <node id="198" labels=":GraphNode:ConnectionPoint">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">ConnectionPoint</data>
-      <data key="d2">64ad4c24-2ea5-4b10-bf38-605e1bce5c6c</data>
+      <data key="d2">25b36946-3f64-4030-b4db-3219fd07c5ab</data>
       <data key="d3">snic1-p2</data>
       <data key="d4">DedicatedPort</data>
       <data key="d5">{"bw": 100, "unit": 1}</data>
@@ -115,43 +115,43 @@
       <data key="d6">false</data>
     </node>
     <node id="199" labels=":GraphNode:NetworkService">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">NetworkService</data>
-      <data key="d2">075f1428-11f9-4e1d-a2b6-842da0643fb5</data>
+      <data key="d2">f4558cee-6c70-4fc8-8c47-9ca715169ea1</data>
       <data key="d3">phys-link</data>
       <data key="d4">L2Path</data>
       <data key="d6">false</data>
       <data key="d11">L2</data>
     </node>
     <node id="200" labels=":GraphNode:ConnectionPoint">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">ConnectionPoint</data>
-      <data key="d2">fcde4fb6-79bc-40a3-8d33-06069f672a46</data>
+      <data key="d2">c135c4e8-2f08-4c9b-a4a3-f63f2f742f74</data>
       <data key="d3">vm1-snic1-p1</data>
       <data key="d4">ServicePort</data>
       <data key="d6">false</data>
     </node>
     <node id="201" labels=":GraphNode:Link">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">Link</data>
-      <data key="d2">6c70117c-8ed3-45b0-bbc5-e1208657c592</data>
+      <data key="d2">ac786b6c-93e8-428d-8b96-27d89e325efc</data>
       <data key="d3">vm1-snic1-p1-link</data>
       <data key="d4">Patch</data>
       <data key="d6">false</data>
       <data key="d11">L2</data>
     </node>
     <node id="202" labels=":GraphNode:ConnectionPoint">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">ConnectionPoint</data>
-      <data key="d2">9e387f10-eb7f-4bf7-9a39-a10e764c6280</data>
+      <data key="d2">b62b3559-105b-4999-b040-f532eb44d9ca</data>
       <data key="d3">vm2-snic1-p1</data>
       <data key="d4">ServicePort</data>
       <data key="d6">false</data>
     </node>
     <node id="203" labels=":GraphNode:Link">
-      <data key="d0">d107f19a-a7ee-4729-ae1f-c39c321590b4</data>
+      <data key="d0">7f483af8-c7a8-4577-a1fc-fb8a255e1d1b</data>
       <data key="d1">Link</data>
-      <data key="d2">b223d4d1-2fec-4d68-8ed9-e436eee4b3c0</data>
+      <data key="d2">a70548b9-cee4-4b1a-b9bf-bfc3e3bd794f</data>
       <data key="d3">vm2-snic1-p1-link</data>
       <data key="d4">Patch</data>
       <data key="d6">false</data>
