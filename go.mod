@@ -7,4 +7,4 @@ require (
 	github.com/google/uuid v1.6.0
 )
 
-replace github.com/Testbed-IAC/fabric-orchestrator-go-client => ../fabric-orchestrator-go-client
+// replace github.com/Testbed-IAC/fabric-orchestrator-go-client => ../fabric-orchestrator-go-client
