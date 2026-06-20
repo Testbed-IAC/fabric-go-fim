@@ -48,7 +48,9 @@ func mapHTTPErr(httpResp *http.Response, err error) error {
 		case http.StatusBadRequest:
 			return fmt.Errorf("%w: %s", ErrBadRequest, truncate(body, 300))
 		case http.StatusInternalServerError:
-			return fmt.Errorf("%w: %s", ErrServerError, truncate(body, 300))
+			// 500s carry the orchestrator's Python error/traceback detail; keep
+			// enough of it to diagnose rather than clipping at a teaser.
+			return fmt.Errorf("%w: %s", ErrServerError, truncate(body, 4000))
 		default:
 			if httpResp.StatusCode >= 300 {
 				return fmt.Errorf("orchestrator returned HTTP %d: %s",

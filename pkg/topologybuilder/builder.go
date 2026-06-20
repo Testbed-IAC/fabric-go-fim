@@ -11,34 +11,82 @@ import (
 	"github.com/Testbed-IAC/fabric-go-fim/pkg/userdata"
 )
 
-// BuildForModify builds the topology and GraphML for spec, then carries the
-// reservation ids of pre-existing elements from existingModel (the GraphML the
-// orchestrator currently persists for the slice) onto the rebuilt graph.
+// BuildModifyFromExisting builds a modify graph by loading the orchestrator's
+// persisted slice model and removing the nodes and network services the desired
+// spec drops. This preserves every persisted NodeID, reservation id, and
+// structural element (service ports, links) the same way fablib does, which is
+// what stock FABRIC's modify path expects.
 //
-// This keeps modify requests compatible with orchestrators that read
-// reservation_info off the submitted graph for unchanged elements (stock FABRIC),
-// mirroring what fablib achieves implicitly by round-tripping the server graph.
-// When existingModel is empty, or carries no reservation ids, it behaves like Build.
-func BuildForModify(spec SliceSpec, existingModel string) (*topology.Topology, string, error) {
-	topo, graphML, err := Build(spec)
-	if err != nil {
-		return nil, "", err
-	}
+// Additions (a node or network service not already in the persisted slice) and an
+// empty existingModel are not reconciled in place yet and fall back to Build.
+func BuildModifyFromExisting(spec SliceSpec, existingModel string) (*topology.Topology, string, error) {
 	if strings.TrimSpace(existingModel) == "" {
-		return topo, graphML, nil
+		return Build(spec)
 	}
-	existing, err := topology.Load(strings.NewReader(existingModel))
+	base, err := topology.Load(strings.NewReader(existingModel))
 	if err != nil {
 		return nil, "", fmt.Errorf("loading existing slice model: %w", err)
 	}
-	if topo.CopyReservationInfoFrom(existing) == 0 {
-		return topo, graphML, nil
+
+	keepNodes := make(map[string]bool, len(spec.Nodes)+len(spec.Facilities))
+	for _, n := range spec.Nodes {
+		keepNodes[n.Name] = true
 	}
-	graphML, err = topo.SerializeString()
+	for _, f := range spec.Facilities {
+		keepNodes[f.Name] = true
+	}
+	keepNets := make(map[string]bool, len(spec.Networks))
+	for _, nw := range spec.Networks {
+		keepNets[nw.Name] = true
+	}
+
+	// Additions are not reconciled against the existing graph yet, so fall back
+	// to a full rebuild when the spec introduces a node or network service the
+	// persisted slice does not already have.
+	for _, n := range spec.Nodes {
+		if _, ok := base.Node(n.Name); !ok {
+			return Build(spec)
+		}
+	}
+	for _, nw := range spec.Networks {
+		if _, ok := base.NetworkService(nw.Name); !ok {
+			return Build(spec)
+		}
+	}
+
+	// Remove dropped nodes, detaching their network-service interfaces first so
+	// no dangling service port or link is left behind on a kept service.
+	for _, node := range base.Nodes() {
+		if keepNodes[node.Name()] {
+			continue
+		}
+		ifaces := node.InterfaceList()
+		for _, svc := range base.NetworkServices() {
+			for _, iface := range ifaces {
+				_ = svc.DisconnectInterface(iface)
+			}
+		}
+		if err := base.RemoveNode(node.Name()); err != nil {
+			return nil, "", fmt.Errorf("removing node %q: %w", node.Name(), err)
+		}
+	}
+
+	// Remove dropped top-level network services. Component-owned services (e.g.
+	// per-NIC OVS realizations) are left to their node's removal.
+	for _, svc := range base.SliceNetworkServices() {
+		if keepNets[svc.Name()] {
+			continue
+		}
+		if err := base.RemoveNetworkService(svc.Name()); err != nil {
+			return nil, "", fmt.Errorf("removing network service %q: %w", svc.Name(), err)
+		}
+	}
+
+	graphML, err := base.SerializeString()
 	if err != nil {
 		return nil, "", fmt.Errorf("serializing modify topology: %w", err)
 	}
-	return topo, graphML, nil
+	return base, graphML, nil
 }
 
 // Build constructs a topology and serialized GraphML from spec.

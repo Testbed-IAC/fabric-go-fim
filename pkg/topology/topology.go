@@ -65,46 +65,6 @@ func (t *Topology) GraphID() string {
 	return t.graphID
 }
 
-// CopyReservationInfoFrom copies the ReservationInfo property from elements in
-// src onto elements in t that share the same NodeID, returning the number of
-// elements stamped.
-//
-// It carries the orchestrator-assigned reservation ids of pre-existing slice
-// elements onto a freshly built modify graph. Stock FABRIC reads reservation_info
-// directly off the submitted graph for unchanged elements; without it the
-// orchestrator dereferences a nil ReservationInfo and fails the modify with
-// "'NoneType' object has no attribute 'reservation_id'". NodeIDs are deterministic
-// in (GraphID, element name), so a rebuilt modify graph reuses the persisted
-// NodeIDs and this match is exact and class-agnostic (nodes, components, network
-// services, and interfaces are all covered).
-func (t *Topology) CopyReservationInfoFrom(src *Topology) int {
-	if t == nil || src == nil {
-		return 0
-	}
-	existing := make(map[string]string)
-	for _, n := range src.g.Nodes() {
-		if ri := n.Props[sliver.PropReservationInfo]; ri != "" {
-			existing[n.ID] = ri
-		}
-	}
-	stamped := 0
-	for _, n := range t.g.Nodes() {
-		ri, ok := existing[n.ID]
-		if !ok || n.Props[sliver.PropReservationInfo] == ri {
-			continue
-		}
-		props := make(map[string]string, len(n.Props)+1)
-		for key, value := range n.Props {
-			props[key] = value
-		}
-		props[sliver.PropReservationInfo] = ri
-		if err := t.g.UpdateNode(n.ID, props); err == nil {
-			stamped++
-		}
-	}
-	return stamped
-}
-
 // AddNode adds a top-level NetworkNode.
 func (t *Topology) AddNode(opts NodeOpts) (*Node, error) {
 	if opts.Type == "" {
@@ -334,6 +294,21 @@ func (t *Topology) NetworkServices() []*NetworkService {
 	var out []*NetworkService
 	for _, node := range t.g.Nodes() {
 		if node.Class == sliver.ClassNetworkService {
+			out = append(out, &NetworkService{t: t, id: node.ID})
+		}
+	}
+	return out
+}
+
+// SliceNetworkServices returns only top-level (slice-owned) NetworkServices,
+// excluding services attached to a node or component such as the per-NIC OVS
+// realizations of a SharedNIC, which are owned by their component and removed
+// with it.
+func (t *Topology) SliceNetworkServices() []*NetworkService {
+	var out []*NetworkService
+	for _, node := range t.g.Nodes() {
+		if node.Class == sliver.ClassNetworkService &&
+			len(t.g.Neighbors(node.ID, sliver.EdgeHas, graph.Incoming)) == 0 {
 			out = append(out, &NetworkService{t: t, id: node.ID})
 		}
 	}
