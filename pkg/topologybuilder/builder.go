@@ -3,12 +3,43 @@ package topologybuilder
 import (
 	"fmt"
 	"net"
+	"strings"
 
 	"github.com/Testbed-IAC/fabric-go-fim/pkg/catalog"
 	"github.com/Testbed-IAC/fabric-go-fim/pkg/sliver"
 	"github.com/Testbed-IAC/fabric-go-fim/pkg/topology"
 	"github.com/Testbed-IAC/fabric-go-fim/pkg/userdata"
 )
+
+// BuildForModify builds the topology and GraphML for spec, then carries the
+// reservation ids of pre-existing elements from existingModel (the GraphML the
+// orchestrator currently persists for the slice) onto the rebuilt graph.
+//
+// This keeps modify requests compatible with orchestrators that read
+// reservation_info off the submitted graph for unchanged elements (stock FABRIC),
+// mirroring what fablib achieves implicitly by round-tripping the server graph.
+// When existingModel is empty, or carries no reservation ids, it behaves like Build.
+func BuildForModify(spec SliceSpec, existingModel string) (*topology.Topology, string, error) {
+	topo, graphML, err := Build(spec)
+	if err != nil {
+		return nil, "", err
+	}
+	if strings.TrimSpace(existingModel) == "" {
+		return topo, graphML, nil
+	}
+	existing, err := topology.Load(strings.NewReader(existingModel))
+	if err != nil {
+		return nil, "", fmt.Errorf("loading existing slice model: %w", err)
+	}
+	if topo.CopyReservationInfoFrom(existing) == 0 {
+		return topo, graphML, nil
+	}
+	graphML, err = topo.SerializeString()
+	if err != nil {
+		return nil, "", fmt.Errorf("serializing modify topology: %w", err)
+	}
+	return topo, graphML, nil
+}
 
 // Build constructs a topology and serialized GraphML from spec.
 func Build(spec SliceSpec) (*topology.Topology, string, error) {
