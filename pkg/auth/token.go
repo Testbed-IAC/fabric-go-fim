@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -173,12 +172,8 @@ func (f *FileToken) IDToken(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("parsing refreshed id_token: %w", err)
 	}
-	body, err := json.MarshalIndent(refreshed, "", "  ")
-	if err != nil {
-		return "", fmt.Errorf("marshalling refreshed token file: %w", err)
-	}
-	if err := os.WriteFile(f.path, append(body, '\n'), 0o600); err != nil {
-		return "", fmt.Errorf("writing refreshed token file %s: %w", f.path, err)
+	if err := WriteTokenFile(f.path, refreshed); err != nil {
+		return "", fmt.Errorf("persisting refreshed token file: %w", err)
 	}
 	f.tokenFile = refreshed
 	f.claims = claims
@@ -218,6 +213,24 @@ func ParseTokenFile(path string) (TokenFile, error) {
 		return TokenFile{}, fmt.Errorf("parsing token file %s: missing id_token", path)
 	}
 	return out, nil
+}
+
+// WriteTokenFile writes tf to path as pretty-printed JSON with 0600
+// permissions and a trailing newline. This is the canonical on-disk token
+// format: FileToken persists refreshed tokens through it, and login flows use
+// it so the file they write reads back through NewFileToken unchanged.
+func WriteTokenFile(path string, tf TokenFile) error {
+	if tf.IDToken == "" {
+		return fmt.Errorf("writing token file %s: missing id_token", path)
+	}
+	body, err := json.MarshalIndent(tf, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshalling token file: %w", err)
+	}
+	if err := os.WriteFile(path, append(body, '\n'), 0o600); err != nil {
+		return fmt.Errorf("writing token file %s: %w", path, err)
+	}
+	return nil
 }
 
 // ParseJWT parses the FABRIC claims from a JWT without verifying its signature.
@@ -302,16 +315,5 @@ func refreshToken(ctx context.Context, client *http.Client, credmgrURL, refreshT
 }
 
 func refreshEndpoint(rawURL string) (string, error) {
-	if rawURL == "" {
-		rawURL = "cm.fabric-testbed.net"
-	}
-	if !strings.HasPrefix(rawURL, "http://") && !strings.HasPrefix(rawURL, "https://") {
-		rawURL = "https://" + rawURL
-	}
-	parsed, err := url.Parse(rawURL)
-	if err != nil {
-		return "", fmt.Errorf("parsing credmgr_url: %w", err)
-	}
-	parsed.Path = strings.TrimRight(parsed.Path, "/") + "/credmgr/tokens/refresh"
-	return parsed.String(), nil
+	return credmgrEndpoint(rawURL, "/credmgr/tokens/refresh", "")
 }

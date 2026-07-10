@@ -50,7 +50,10 @@ func WaitForSlice(ctx context.Context, c SliceGetter, sliceID string, successSta
 				return slice, nil
 			}
 			if failure[slice.State] {
-				return slice, fmt.Errorf("polling slice %s reached %s: %s", sliceID, slice.State, slice.Notice)
+				if slice.Notice != "" {
+					return slice, fmt.Errorf("polling slice %s reached %s: %s", sliceID, slice.State, slice.Notice)
+				}
+				return slice, fmt.Errorf("polling slice %s reached %s", sliceID, slice.State)
 			}
 		}
 
@@ -81,7 +84,10 @@ func WaitForPOA(ctx context.Context, c POAGetter, poaID string, timeout, interva
 			case POASuccessState:
 				return poa, nil
 			case POAFailedState:
-				return poa, fmt.Errorf("polling poa %s reached %s: %s", poaID, poa.State, poa.Error)
+				if poa.Error != "" {
+					return poa, fmt.Errorf("polling poa %s reached %s: %s", poaID, poa.State, poa.Error)
+				}
+				return poa, fmt.Errorf("polling poa %s reached %s", poaID, poa.State)
 			}
 		}
 

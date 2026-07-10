@@ -1,11 +1,15 @@
 package client
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/Testbed-IAC/fabric-go-fim/pkg/auth"
 )
 
 func responseWithBody(status int, body string) *http.Response {
@@ -83,6 +87,85 @@ func TestMapHTTPErrUndefinedResponseTypeWithHTTPRespIncludesBody(t *testing.T) {
 		if !strings.Contains(msg, sub) {
 			t.Fatalf("msg missing %q; full msg:\n%s", sub, msg)
 		}
+	}
+}
+
+// fakeTokenSource satisfies auth.TokenSource for httptest-backed client tests.
+type fakeTokenSource struct{}
+
+func (fakeTokenSource) IDToken(context.Context) (string, error) { return "test-token", nil }
+func (fakeTokenSource) ProjectID() string                       { return "" }
+func (fakeTokenSource) Claims() *auth.Claims                    { return nil }
+
+func TestMapHTTPErrPrefersStructuredModel(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name        string
+		status      int
+		body        string
+		wantErr     error
+		wantContain []string
+		wantAbsent  []string
+	}{
+		{
+			name:        "400 message and details joined",
+			status:      http.StatusBadRequest,
+			body:        `{"errors":[{"message":"invalid GraphML","details":"node vm1 has no site"}]}`,
+			wantErr:     ErrBadRequest,
+			wantContain: []string{"invalid GraphML: node vm1 has no site"},
+			wantAbsent:  []string{`{"errors"`},
+		},
+		{
+			name:        "403 message only",
+			status:      http.StatusForbidden,
+			body:        `{"errors":[{"message":"project lacks Component.FPGA tag"}]}`,
+			wantErr:     ErrForbidden,
+			wantContain: []string{"project lacks Component.FPGA tag"},
+			wantAbsent:  []string{`{"errors"`},
+		},
+		{
+			name:        "500 multiple entries joined",
+			status:      http.StatusInternalServerError,
+			body:        `{"errors":[{"message":"first"},{"message":"second"}]}`,
+			wantErr:     ErrServerError,
+			wantContain: []string{"first; second"},
+		},
+		{
+			name:        "undecodable body falls back to raw text",
+			status:      http.StatusBadRequest,
+			body:        `plain failure text`,
+			wantErr:     ErrBadRequest,
+			wantContain: []string{"plain failure text"},
+		},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(tc.status)
+				_, _ = io.WriteString(w, tc.body)
+			}))
+			defer srv.Close()
+
+			c := New(srv.URL, fakeTokenSource{})
+			_, err := c.GetSlice(context.Background(), "3f4a7b1e-aaaa-bbbb-cccc-000000000000")
+			if !errors.Is(err, tc.wantErr) {
+				t.Fatalf("err = %v, want %v", err, tc.wantErr)
+			}
+			msg := err.Error()
+			for _, sub := range tc.wantContain {
+				if !strings.Contains(msg, sub) {
+					t.Fatalf("msg missing %q; full msg:\n%s", sub, msg)
+				}
+			}
+			for _, sub := range tc.wantAbsent {
+				if strings.Contains(msg, sub) {
+					t.Fatalf("msg should not contain raw %q; full msg:\n%s", sub, msg)
+				}
+			}
+		})
 	}
 }
 

@@ -35,6 +35,7 @@ type ComponentAvail struct {
 // Site contains site-level advertised resource details.
 type Site struct {
 	Name           string                    `json:"name,omitempty"`
+	State          string                    `json:"state,omitempty"`
 	Cores          CapacityAvailability      `json:"cores,omitempty"`
 	RAM            CapacityAvailability      `json:"ram,omitempty"`
 	Disk           CapacityAvailability      `json:"disk,omitempty"`

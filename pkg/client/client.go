@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	openapi "github.com/Testbed-IAC/fabric-orchestrator-go-client"
 
 	"github.com/Testbed-IAC/fabric-go-fim/pkg/auth"
+	"github.com/Testbed-IAC/fabric-go-fim/pkg/sliver"
 )
 
 // Client adapts the generated FABRIC orchestrator OpenAPI client to a stable,
@@ -105,7 +107,14 @@ func (c *Client) ListSlices(ctx context.Context, name string, states []string) (
 			return nil, mapHTTPErr(httpResp, err)
 		}
 		for _, s := range page.Data {
-			out = append(out, Slice{SliceID: s.GetSliceId(), Name: s.GetName(), GraphID: s.GetGraphId(), State: s.GetState()})
+			out = append(out, Slice{
+				SliceID:        s.GetSliceId(),
+				Name:           s.GetName(),
+				GraphID:        s.GetGraphId(),
+				State:          s.GetState(),
+				LeaseStartTime: s.GetLeaseStartTime(),
+				LeaseEndTime:   s.GetLeaseEndTime(),
+			})
 		}
 		if len(page.Data) < 200 {
 			return out, nil
@@ -299,15 +308,18 @@ func (c *Client) GetMetricsOverview(ctx context.Context, query MetricsQuery) (st
 func convertSlivers(in []openapi.Sliver) []Sliver {
 	out := make([]Sliver, 0, len(in))
 	for _, s := range in {
+		payload := s.GetSliver()
 		out = append(out, Sliver{
 			SliceID:      s.GetSliceId(),
 			SliverID:     s.GetSliverId(),
 			GraphNodeID:  s.GetGraphNodeId(),
+			Name:         nameFromSliverPayload(payload),
 			SliverType:   s.GetSliverType(),
+			Image:        imageFromSliverPayload(payload),
 			State:        s.GetState(),
 			PendingState: s.GetPendingState(),
 			JoinState:    s.GetJoinState(),
-			ManagementIP: managementIPFromSliverPayload(s.GetSliver()),
+			ManagementIP: managementIPFromSliverPayload(payload),
 			Notice:       s.GetNotice(),
 		})
 	}
@@ -375,13 +387,38 @@ func metricsResultsJSON(metrics *openapi.Metrics) (string, error) {
 }
 
 func managementIPFromSliverPayload(payload map[string]interface{}) string {
-	for _, key := range []string{"management_ip", "managementIP", "mgmt_ip", "mgmtIP"} {
-		value, ok := payload[key].(string)
-		if ok {
+	// The realized sliver's ASM element uses the "MgmtIp" property key
+	// (sliver.PropMgmtIP); the others are defensive fallbacks for older shapes.
+	for _, key := range []string{sliver.PropMgmtIP, "management_ip", "managementIP", "mgmt_ip", "mgmtIP"} {
+		if value, ok := payload[key].(string); ok && value != "" {
 			return value
 		}
 	}
 	return ""
+}
+
+// nameFromSliverPayload returns the node's friendly name (e.g. "worker-0") from
+// the sliver's ASM element, empty when absent.
+func nameFromSliverPayload(payload map[string]interface{}) string {
+	if value, ok := payload[sliver.PropName].(string); ok {
+		return value
+	}
+	return ""
+}
+
+// imageFromSliverPayload returns the OS image name (e.g. "default_ubuntu_22")
+// from the sliver's ASM element. The ImageRef property is stored as
+// "<image>,<type>" (e.g. "default_ubuntu_22,qcow2"); only the image name is
+// returned. Empty for slivers without an image, such as network services.
+func imageFromSliverPayload(payload map[string]interface{}) string {
+	value, ok := payload[sliver.PropImageRef].(string)
+	if !ok || value == "" || value == "None" {
+		return ""
+	}
+	if comma := strings.IndexByte(value, ','); comma >= 0 {
+		return value[:comma]
+	}
+	return value
 }
 
 var _ API = (*Client)(nil)

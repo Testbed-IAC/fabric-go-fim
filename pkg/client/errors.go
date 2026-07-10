@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	openapi "github.com/Testbed-IAC/fabric-orchestrator-go-client"
 )
@@ -37,24 +38,28 @@ func mapHTTPErr(httpResp *http.Response, err error) error {
 			body = string(respBody)
 		}
 	}
+	// Prefer the decoded error entries (stashed in Model()) over the raw body.
+	detail := structuredDetail(apiErr)
+	if detail == "" {
+		detail = body
+	}
 	if httpResp != nil {
 		switch httpResp.StatusCode {
 		case http.StatusUnauthorized:
-			return fmt.Errorf("%w: %s", ErrUnauthorized, truncate(body, 300))
+			return fmt.Errorf("%w: %s", ErrUnauthorized, truncate(detail, 300))
 		case http.StatusForbidden:
-			return fmt.Errorf("%w: %s", ErrForbidden, truncate(body, 300))
+			return fmt.Errorf("%w: %s", ErrForbidden, truncate(detail, 300))
 		case http.StatusNotFound:
-			return fmt.Errorf("%w: %s", ErrNotFound, truncate(body, 300))
+			return fmt.Errorf("%w: %s", ErrNotFound, truncate(detail, 300))
 		case http.StatusBadRequest:
-			return fmt.Errorf("%w: %s", ErrBadRequest, truncate(body, 300))
+			return fmt.Errorf("%w: %s", ErrBadRequest, truncate(detail, 300))
 		case http.StatusInternalServerError:
-			// 500s carry the orchestrator's Python error/traceback detail; keep
-			// enough of it to diagnose rather than clipping at a teaser.
-			return fmt.Errorf("%w: %s", ErrServerError, truncate(body, 4000))
+			// 500s carry the orchestrator's traceback; keep enough to diagnose.
+			return fmt.Errorf("%w: %s", ErrServerError, truncate(detail, 4000))
 		default:
 			if httpResp.StatusCode >= 300 {
 				return fmt.Errorf("orchestrator returned HTTP %d: %s",
-					httpResp.StatusCode, truncate(body, 300))
+					httpResp.StatusCode, truncate(detail, 300))
 			}
 		}
 	}
@@ -85,4 +90,54 @@ func truncate(s string, n int) string {
 		return s
 	}
 	return s[:n] + "...(truncated)"
+}
+
+// errorEntry is the shape shared by every generated StatusNNNErrors model.
+type errorEntry interface {
+	GetMessage() string
+	GetDetails() string
+}
+
+// structuredDetail joins the message/details pairs decoded from an error
+// response. Returns "" when no structured model is available.
+func structuredDetail(apiErr *openapi.GenericOpenAPIError) string {
+	if apiErr == nil {
+		return ""
+	}
+	switch m := apiErr.Model().(type) {
+	case openapi.Status400BadRequest:
+		return joinEntries(m.Errors)
+	case openapi.Status401Unauthorized:
+		return joinEntries(m.Errors)
+	case openapi.Status403Forbidden:
+		return joinEntries(m.Errors)
+	case openapi.Status404NotFound:
+		return joinEntries(m.Errors)
+	case openapi.Status500InternalServerError:
+		return joinEntries(m.Errors)
+	default:
+		return ""
+	}
+}
+
+// joinEntries renders decoded error entries as "message: details" fragments.
+// The generated getters have pointer receivers, hence the pointer constraint.
+func joinEntries[T any, P interface {
+	*T
+	errorEntry
+}](entries []T) string {
+	parts := make([]string, 0, len(entries))
+	for i := range entries {
+		entry := P(&entries[i])
+		message, details := entry.GetMessage(), entry.GetDetails()
+		switch {
+		case message != "" && details != "" && message != details:
+			parts = append(parts, message+": "+details)
+		case details != "":
+			parts = append(parts, details)
+		case message != "":
+			parts = append(parts, message)
+		}
+	}
+	return strings.Join(parts, "; ")
 }

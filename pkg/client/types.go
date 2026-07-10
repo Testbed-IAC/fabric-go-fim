@@ -20,7 +20,9 @@ type Sliver struct {
 	SliceID      string
 	SliverID     string
 	GraphNodeID  string
+	Name         string // friendly node name (e.g. "worker-0"); empty for non-node slivers
 	SliverType   string
+	Image        string // OS image name (e.g. "default_ubuntu_22"); empty for non-VM slivers
 	State        string
 	PendingState string
 	JoinState    string
