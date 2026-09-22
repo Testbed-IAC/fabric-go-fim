@@ -101,20 +101,81 @@ func TestBuildModifyFromExisting_RemovesNodeAndServicePort(t *testing.T) {
 	}
 }
 
-// A spec that adds a node the persisted slice lacks falls back to a full rebuild
-// rather than the round-trip.
-func TestBuildModifyFromExisting_AdditionFallsBack(t *testing.T) {
-	_, existingModel, err := Build(l2BridgeSpec("vm-1", "vm-2"))
+func TestBuildModifyFromExisting_AddsNodeInPlace(t *testing.T) {
+	existing, existingModel, err := Build(l2BridgeSpec("vm-1", "vm-2"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Adding vm-3 is not reconciled in place; expect the rebuild to still produce
-	// a valid 3-node graph.
-	modTopo, _, err := BuildModifyFromExisting(l2BridgeSpec("vm-1", "vm-2", "vm-3"), existingModel)
+	vm1, _ := existing.Node("vm-1")
+	bridge, _ := existing.NetworkService("l2-bridge")
+	wantVM1ID, wantBridgeID := vm1.ID(), bridge.ID()
+	bridgeIfacesBefore := len(bridge.Interfaces())
+
+	modTopo, modGraphML, err := BuildModifyFromExisting(l2BridgeSpec("vm-1", "vm-2", "vm-3"), existingModel)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !nodeNames(modTopo)["vm-3"] {
-		t.Fatal("fallback build did not include the added node vm-3")
+		t.Fatal("added node vm-3 missing after modify")
+	}
+	gotVM1, _ := modTopo.Node("vm-1")
+	gotBridge, _ := modTopo.NetworkService("l2-bridge")
+	if gotVM1.ID() != wantVM1ID {
+		t.Fatalf("vm-1 NodeID changed: %q -> %q", wantVM1ID, gotVM1.ID())
+	}
+	if gotBridge.ID() != wantBridgeID {
+		t.Fatalf("l2-bridge NodeID changed: %q -> %q", wantBridgeID, gotBridge.ID())
+	}
+	if got := len(gotBridge.Interfaces()); got != bridgeIfacesBefore+1 {
+		t.Fatalf("bridge interface count = %d, want %d", got, bridgeIfacesBefore+1)
+	}
+	for _, iface := range gotBridge.Interfaces() {
+		if iface.Type() == sliver.InterfaceTypeServicePort {
+			if got := len(iface.GetPeers("")); got != 1 {
+				t.Fatalf("ServicePort %q has %d peers after modify, want 1", iface.Name(), got)
+			}
+		}
+	}
+	if _, ok := modTopo.NetworkService("vm-3-nic1-l2ovs"); !ok {
+		t.Fatal("added node vm-3 has no OVS network service")
+	}
+	if !strings.Contains(modGraphML, "vm-3") {
+		t.Fatal("serialized modify graph does not reference vm-3")
+	}
+
+	again, _, err := BuildModifyFromExisting(l2BridgeSpec("vm-1", "vm-2", "vm-3"), modGraphML)
+	if err != nil {
+		t.Fatal(err)
+	}
+	againBridge, _ := again.NetworkService("l2-bridge")
+	if got := len(againBridge.Interfaces()); got != bridgeIfacesBefore+1 {
+		t.Fatalf("unchanged modify altered bridge interface count: %d, want %d", got, bridgeIfacesBefore+1)
+	}
+}
+
+func TestBuildModifyFromExisting_AddsNetworkInPlace(t *testing.T) {
+	spec := l2BridgeSpec("vm-1", "vm-2")
+	spec.Networks = nil
+	existing, existingModel, err := Build(spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	vm1, _ := existing.Node("vm-1")
+	wantVM1ID := vm1.ID()
+
+	modTopo, _, err := BuildModifyFromExisting(l2BridgeSpec("vm-1", "vm-2"), existingModel)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotVM1, _ := modTopo.Node("vm-1")
+	if gotVM1.ID() != wantVM1ID {
+		t.Fatalf("vm-1 NodeID changed: %q -> %q", wantVM1ID, gotVM1.ID())
+	}
+	bridge, ok := modTopo.NetworkService("l2-bridge")
+	if !ok {
+		t.Fatal("added network l2-bridge missing after modify")
+	}
+	if got := len(bridge.Interfaces()); got != 2 {
+		t.Fatalf("bridge interface count = %d, want 2", got)
 	}
 }

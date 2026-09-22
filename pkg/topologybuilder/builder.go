@@ -16,9 +16,6 @@ import (
 // spec drops. This preserves every persisted NodeID, reservation id, and
 // structural element (service ports, links) the same way fablib does, which is
 // what stock FABRIC's modify path expects.
-//
-// Additions (a node or network service not already in the persisted slice) and an
-// empty existingModel are not reconciled in place yet and fall back to Build.
 func BuildModifyFromExisting(spec SliceSpec, existingModel string) (*topology.Topology, string, error) {
 	if strings.TrimSpace(existingModel) == "" {
 		return Build(spec)
@@ -28,30 +25,19 @@ func BuildModifyFromExisting(spec SliceSpec, existingModel string) (*topology.To
 		return nil, "", fmt.Errorf("loading existing slice model: %w", err)
 	}
 
-	keepNodes := make(map[string]bool, len(spec.Nodes)+len(spec.Facilities))
+	keepNodes := make(map[string]bool, len(spec.Nodes)+len(spec.Facilities)+len(spec.Switches))
 	for _, n := range spec.Nodes {
 		keepNodes[n.Name] = true
 	}
 	for _, f := range spec.Facilities {
 		keepNodes[f.Name] = true
 	}
+	for _, sw := range spec.Switches {
+		keepNodes[sw.Name] = true
+	}
 	keepNets := make(map[string]bool, len(spec.Networks))
 	for _, nw := range spec.Networks {
 		keepNets[nw.Name] = true
-	}
-
-	// Additions are not reconciled against the existing graph yet, so fall back
-	// to a full rebuild when the spec introduces a node or network service the
-	// persisted slice does not already have.
-	for _, n := range spec.Nodes {
-		if _, ok := base.Node(n.Name); !ok {
-			return Build(spec)
-		}
-	}
-	for _, nw := range spec.Networks {
-		if _, ok := base.NetworkService(nw.Name); !ok {
-			return Build(spec)
-		}
 	}
 
 	// Remove dropped nodes, detaching their network-service interfaces first so
@@ -82,11 +68,92 @@ func BuildModifyFromExisting(spec SliceSpec, existingModel string) (*topology.To
 		}
 	}
 
+	nodes := map[string]*topology.Node{}
+	for _, node := range spec.Nodes {
+		if existing, ok := base.Node(node.Name); ok {
+			nodes[node.Name] = existing
+			continue
+		}
+		built, err := addNode(base, node)
+		if err != nil {
+			return nil, "", err
+		}
+		nodes[node.Name] = built
+	}
+	facilities := map[string]*topology.Node{}
+	for _, facility := range spec.Facilities {
+		if existing, ok := base.Node(facility.Name); ok {
+			facilities[facility.Name] = existing
+			continue
+		}
+		built, err := buildFacility(base, facility)
+		if err != nil {
+			return nil, "", fmt.Errorf("adding facility %s: %w", facility.Name, err)
+		}
+		facilities[facility.Name] = built
+	}
+	for _, sw := range spec.Switches {
+		if _, ok := base.Node(sw.Name); ok {
+			continue
+		}
+		if err := buildSwitch(base, sw); err != nil {
+			return nil, "", fmt.Errorf("adding switch %s: %w", sw.Name, err)
+		}
+	}
+	for _, network := range spec.Networks {
+		svc, ok := base.NetworkService(network.Name)
+		if !ok {
+			if err := addNetwork(base, nodes, facilities, network); err != nil {
+				return nil, "", err
+			}
+			continue
+		}
+		if network.Type == "PortMirror" {
+			continue
+		}
+		if err := connectMissing(svc, nodes, facilities, network); err != nil {
+			return nil, "", err
+		}
+	}
+
 	graphML, err := base.SerializeString()
 	if err != nil {
 		return nil, "", fmt.Errorf("serializing modify topology: %w", err)
 	}
 	return base, graphML, nil
+}
+
+func connectMissing(svc *topology.NetworkService, nodes, facilities map[string]*topology.Node, network NetworkSpec) error {
+	ports := map[string]bool{}
+	for _, port := range svc.Interfaces() {
+		ports[port.ID()] = true
+	}
+	for _, ifaceSpec := range network.Interfaces {
+		iface, err := resolveNetworkInterface(nodes, facilities, ifaceSpec)
+		if err != nil {
+			return fmt.Errorf("resolving interface for network %s: %w", network.Name, err)
+		}
+		attached := false
+		for _, peer := range iface.GetPeers(sliver.InterfaceTypeServicePort) {
+			if ports[peer.ID()] {
+				attached = true
+				break
+			}
+		}
+		if attached {
+			continue
+		}
+		if err := iface.SetLabels(ifaceSpec.Labels); err != nil {
+			return fmt.Errorf("setting labels for network %s interface: %w", network.Name, err)
+		}
+		if err := addSubInterfaces(iface, ifaceSpec.SubInterfaces); err != nil {
+			return fmt.Errorf("adding sub-interfaces for network %s: %w", network.Name, err)
+		}
+		if err := svc.ConnectInterface(iface); err != nil {
+			return fmt.Errorf("connecting interface to network %s: %w", network.Name, err)
+		}
+	}
+	return nil
 }
 
 // Build constructs a topology and serialized GraphML from spec.
@@ -95,62 +162,11 @@ func Build(spec SliceSpec) (*topology.Topology, string, error) {
 	nodes := map[string]*topology.Node{}
 
 	for _, node := range spec.Nodes {
-		labels, err := nodeLabels(node)
+		built, err := addNode(topo, node)
 		if err != nil {
-			return nil, "", fmt.Errorf("building labels for node %s: %w", node.Name, err)
-		}
-		opts := topology.NodeOpts{
-			Name:       node.Name,
-			Site:       node.Site,
-			Type:       sliver.NodeTypeVM,
-			ImageRef:   defaultString(node.ImageRef, "default_rocky_9"),
-			ImageType:  defaultString(node.ImageType, "qcow2"),
-			BootScript: node.BootScript,
-			Labels:     labels,
-		}
-		userData, err := assembleUserData(node)
-		if err != nil {
-			return nil, "", fmt.Errorf("building user-data for node %s: %w", node.Name, err)
-		}
-		if len(userData) > 0 {
-			opts.UserData = userData
-		}
-		if node.InstanceType != "" {
-			opts.CapacityHints = &sliver.CapacityHints{InstanceType: node.InstanceType}
-			if caps, ok := explicitCapacities(node); ok {
-				opts.Capacities = &caps
-			}
-		} else {
-			caps := CapacitiesFromNode(node)
-			opts.Capacities = &caps
-		}
-		built, err := topo.AddNode(opts)
-		if err != nil {
-			return nil, "", fmt.Errorf("adding node %s: %w", node.Name, err)
+			return nil, "", err
 		}
 		nodes[node.Name] = built
-		for _, component := range node.Components {
-			componentOpts := topology.ComponentOpts{
-				Name:       component.Name,
-				Type:       component.Type,
-				Model:      component.Model,
-				FABlibName: component.FABlibName,
-				Labels:     component.Labels,
-			}
-			if _, err := built.AddComponent(componentOpts); err != nil {
-				return nil, "", fmt.Errorf("adding component %s: %w", component.Name, err)
-			}
-		}
-		for _, storage := range node.Storage {
-			storageOpts := topology.ComponentOpts{
-				Name:  storage.Name,
-				Type:  sliver.ComponentTypeStorage,
-				Model: defaultString(storage.Model, "NAS"),
-			}
-			if _, err := built.AddComponent(storageOpts); err != nil {
-				return nil, "", fmt.Errorf("adding storage %s: %w", storage.Name, err)
-			}
-		}
 	}
 
 	facilities := map[string]*topology.Node{}
@@ -169,65 +185,8 @@ func Build(spec SliceSpec) (*topology.Topology, string, error) {
 	}
 
 	for _, network := range spec.Networks {
-		networkLabels := network.Labels
-		if network.Type == "PortMirror" {
-			firstIface := firstInterface(network)
-			toInterface, err := resolveNetworkInterface(nodes, facilities, firstIface)
-			if err != nil {
-				return nil, "", fmt.Errorf("resolving mirror destination: %w", err)
-			}
-			if err := toInterface.SetLabels(firstIface.Labels); err != nil {
-				return nil, "", fmt.Errorf("setting labels for port mirror %s interface: %w", network.Name, err)
-			}
-			_, err = topo.AddPortMirrorService(topology.PortMirrorOpts{
-				Name:              network.Name,
-				FromInterfaceName: network.MirrorFrom,
-				ToInterface:       toInterface,
-				Direction:         NormalizeMirrorDirection(network.MirrorDirection),
-				Labels:            networkLabels,
-			})
-			if err != nil {
-				return nil, "", fmt.Errorf("adding port mirror %s: %w", network.Name, err)
-			}
-			continue
-		}
-		ifaces := make([]*topology.Interface, 0, len(network.Interfaces))
-		for _, ifaceSpec := range network.Interfaces {
-			iface, err := resolveNetworkInterface(nodes, facilities, ifaceSpec)
-			if err != nil {
-				return nil, "", fmt.Errorf("resolving interface for network %s: %w", network.Name, err)
-			}
-			if err := iface.SetLabels(ifaceSpec.Labels); err != nil {
-				return nil, "", fmt.Errorf("setting labels for network %s interface: %w", network.Name, err)
-			}
-			if err := addSubInterfaces(iface, ifaceSpec.SubInterfaces); err != nil {
-				return nil, "", fmt.Errorf("adding sub-interfaces for network %s: %w", network.Name, err)
-			}
-			ifaces = append(ifaces, iface)
-		}
-		serviceType, err := resolveServiceType(topo, network, ifaces)
-		if err != nil {
-			return nil, "", fmt.Errorf("resolving type for network %s: %w", network.Name, err)
-		}
-		gateway, gatewayLabels, err := gatewayFromNetwork(network)
-		if err != nil {
-			return nil, "", fmt.Errorf("building gateway for network %s: %w", network.Name, err)
-		}
-		networkLabels = mergeNetworkLabels(networkLabels, gatewayLabels)
-		opts := topology.NetworkServiceOpts{
-			Name:       network.Name,
-			Type:       serviceType,
-			Interfaces: ifaces,
-			Labels:     networkLabels,
-			Site:       network.Site,
-			Technology: network.Technology,
-			Gateway:    gateway,
-		}
-		if network.Bandwidth > 0 {
-			opts.Capacities = &sliver.Capacities{BW: int(network.Bandwidth)}
-		}
-		if _, err := topo.AddNetworkService(opts); err != nil {
-			return nil, "", fmt.Errorf("adding network %s: %w", network.Name, err)
+		if err := addNetwork(topo, nodes, facilities, network); err != nil {
+			return nil, "", err
 		}
 	}
 
@@ -236,6 +195,129 @@ func Build(spec SliceSpec) (*topology.Topology, string, error) {
 		return nil, "", fmt.Errorf("serializing topology: %w", err)
 	}
 	return topo, graphML, nil
+}
+
+func addNode(topo *topology.Topology, node NodeSpec) (*topology.Node, error) {
+	labels, err := nodeLabels(node)
+	if err != nil {
+		return nil, fmt.Errorf("building labels for node %s: %w", node.Name, err)
+	}
+	opts := topology.NodeOpts{
+		Name:       node.Name,
+		Site:       node.Site,
+		Type:       sliver.NodeTypeVM,
+		ImageRef:   defaultString(node.ImageRef, "default_rocky_9"),
+		ImageType:  defaultString(node.ImageType, "qcow2"),
+		BootScript: node.BootScript,
+		Labels:     labels,
+	}
+	userData, err := assembleUserData(node)
+	if err != nil {
+		return nil, fmt.Errorf("building user-data for node %s: %w", node.Name, err)
+	}
+	if len(userData) > 0 {
+		opts.UserData = userData
+	}
+	if node.InstanceType != "" {
+		opts.CapacityHints = &sliver.CapacityHints{InstanceType: node.InstanceType}
+		if caps, ok := explicitCapacities(node); ok {
+			opts.Capacities = &caps
+		}
+	} else {
+		caps := CapacitiesFromNode(node)
+		opts.Capacities = &caps
+	}
+	built, err := topo.AddNode(opts)
+	if err != nil {
+		return nil, fmt.Errorf("adding node %s: %w", node.Name, err)
+	}
+	for _, component := range node.Components {
+		componentOpts := topology.ComponentOpts{
+			Name:       component.Name,
+			Type:       component.Type,
+			Model:      component.Model,
+			FABlibName: component.FABlibName,
+			Labels:     component.Labels,
+		}
+		if _, err := built.AddComponent(componentOpts); err != nil {
+			return nil, fmt.Errorf("adding component %s: %w", component.Name, err)
+		}
+	}
+	for _, storage := range node.Storage {
+		storageOpts := topology.ComponentOpts{
+			Name:  storage.Name,
+			Type:  sliver.ComponentTypeStorage,
+			Model: defaultString(storage.Model, "NAS"),
+		}
+		if _, err := built.AddComponent(storageOpts); err != nil {
+			return nil, fmt.Errorf("adding storage %s: %w", storage.Name, err)
+		}
+	}
+	return built, nil
+}
+
+func addNetwork(topo *topology.Topology, nodes, facilities map[string]*topology.Node, network NetworkSpec) error {
+	networkLabels := network.Labels
+	if network.Type == "PortMirror" {
+		firstIface := firstInterface(network)
+		toInterface, err := resolveNetworkInterface(nodes, facilities, firstIface)
+		if err != nil {
+			return fmt.Errorf("resolving mirror destination: %w", err)
+		}
+		if err := toInterface.SetLabels(firstIface.Labels); err != nil {
+			return fmt.Errorf("setting labels for port mirror %s interface: %w", network.Name, err)
+		}
+		_, err = topo.AddPortMirrorService(topology.PortMirrorOpts{
+			Name:              network.Name,
+			FromInterfaceName: network.MirrorFrom,
+			ToInterface:       toInterface,
+			Direction:         NormalizeMirrorDirection(network.MirrorDirection),
+			Labels:            networkLabels,
+		})
+		if err != nil {
+			return fmt.Errorf("adding port mirror %s: %w", network.Name, err)
+		}
+		return nil
+	}
+	ifaces := make([]*topology.Interface, 0, len(network.Interfaces))
+	for _, ifaceSpec := range network.Interfaces {
+		iface, err := resolveNetworkInterface(nodes, facilities, ifaceSpec)
+		if err != nil {
+			return fmt.Errorf("resolving interface for network %s: %w", network.Name, err)
+		}
+		if err := iface.SetLabels(ifaceSpec.Labels); err != nil {
+			return fmt.Errorf("setting labels for network %s interface: %w", network.Name, err)
+		}
+		if err := addSubInterfaces(iface, ifaceSpec.SubInterfaces); err != nil {
+			return fmt.Errorf("adding sub-interfaces for network %s: %w", network.Name, err)
+		}
+		ifaces = append(ifaces, iface)
+	}
+	serviceType, err := resolveServiceType(topo, network, ifaces)
+	if err != nil {
+		return fmt.Errorf("resolving type for network %s: %w", network.Name, err)
+	}
+	gateway, gatewayLabels, err := gatewayFromNetwork(network)
+	if err != nil {
+		return fmt.Errorf("building gateway for network %s: %w", network.Name, err)
+	}
+	networkLabels = mergeNetworkLabels(networkLabels, gatewayLabels)
+	opts := topology.NetworkServiceOpts{
+		Name:       network.Name,
+		Type:       serviceType,
+		Interfaces: ifaces,
+		Labels:     networkLabels,
+		Site:       network.Site,
+		Technology: network.Technology,
+		Gateway:    gateway,
+	}
+	if network.Bandwidth > 0 {
+		opts.Capacities = &sliver.Capacities{BW: int(network.Bandwidth)}
+	}
+	if _, err := topo.AddNetworkService(opts); err != nil {
+		return fmt.Errorf("adding network %s: %w", network.Name, err)
+	}
+	return nil
 }
 
 // ValidateCatalog validates instance and component selections against the embedded catalogs.
