@@ -16,7 +16,10 @@ func TestDiffTopologies(t *testing.T) {
 		t.Fatalf("AddNode actual: %v", err)
 	}
 
-	diff := DiffTopologies(expected, actual)
+	diff, err := DiffTopologies(expected, actual)
+	if err != nil {
+		t.Fatalf("DiffTopologies: %v", err)
+	}
 
 	if !diff.HasChanges() || !diff.RawGraph.HasChanges() {
 		t.Fatalf("diff = %+v, want topology changes", diff)

@@ -18,6 +18,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	diff := topology.DiffTopologies(desired, actual)
+	diff, err := topology.DiffTopologies(desired, actual)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(diff.Summary())
 }

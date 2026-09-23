@@ -85,9 +85,9 @@ type ClassifiedDiagnostic struct {
 
 // DiffGraphs compares expected and actual graphs by semantic topology intent,
 // ignoring generated IDs, GraphML-local IDs, and runtime-only FABRIC fields.
-func DiffGraphs(expected, actual *graph.Graph) GraphDiff {
+func DiffGraphs(expected, actual *graph.Graph) (GraphDiff, error) {
 	if expected == nil && actual == nil {
-		return GraphDiff{}
+		return GraphDiff{}, nil
 	}
 	if expected == nil {
 		expected = graph.New("")
@@ -97,13 +97,13 @@ func DiffGraphs(expected, actual *graph.Graph) GraphDiff {
 	}
 	normalizedExpected, err := NormalizeGraph(expected)
 	if err != nil {
-		return GraphDiff{}
+		return GraphDiff{}, fmt.Errorf("topology: diff: normalize expected: %w", err)
 	}
 	normalizedActual, err := NormalizeGraph(actual)
 	if err != nil {
-		return GraphDiff{}
+		return GraphDiff{}, fmt.Errorf("topology: diff: normalize actual: %w", err)
 	}
-	return diffNormalizedGraphs(normalizedExpected, normalizedActual)
+	return diffNormalizedGraphs(normalizedExpected, normalizedActual), nil
 }
 
 // DiffGraphML parses and compares two GraphML documents by semantic topology
@@ -117,7 +117,7 @@ func DiffGraphML(expectedGraphML, actualGraphML []byte) (GraphDiff, error) {
 	if err != nil {
 		return GraphDiff{}, fmt.Errorf("topology: diff graphml: parse actual: %w", err)
 	}
-	return DiffGraphs(expected, actual), nil
+	return DiffGraphs(expected, actual)
 }
 
 // Empty reports whether the graph diff contains no semantic changes.

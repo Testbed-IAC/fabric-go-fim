@@ -13,7 +13,7 @@ import (
 func TestDiffGraphsEmptyForSameGraph(t *testing.T) {
 	g := testGraph(t, "graph-a", testNode{id: "node-a", name: "vm1", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM)})
 
-	diff := DiffGraphs(g, g)
+	diff := mustDiff(t, g, g)
 
 	if !diff.Empty() {
 		t.Fatalf("diff = %+v, want empty", diff)
@@ -31,7 +31,7 @@ func TestDiffGraphsEmptyForSemanticallyEquivalentFixture(t *testing.T) {
 		t.Fatalf("Read expected GraphML: %v", err)
 	}
 
-	diff := DiffGraphs(expected, actual)
+	diff := mustDiff(t, expected, actual)
 
 	if !diff.Empty() {
 		t.Fatalf("diff = %+v, want empty", diff)
@@ -45,7 +45,7 @@ func TestDiffGraphsAddedNode(t *testing.T) {
 		testNode{id: "node-b", name: "vm2", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM), props: map[string]string{sliver.PropSite: "UKY"}},
 	)
 
-	diff := DiffGraphs(expected, actual)
+	diff := mustDiff(t, expected, actual)
 
 	if len(diff.AddedNodes) != 1 {
 		t.Fatalf("AddedNodes = %+v, want one added node", diff.AddedNodes)
@@ -62,7 +62,7 @@ func TestDiffGraphsRemovedNode(t *testing.T) {
 	)
 	actual := testGraph(t, "actual", testNode{id: "node-a2", name: "vm1", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM)})
 
-	diff := DiffGraphs(expected, actual)
+	diff := mustDiff(t, expected, actual)
 
 	if len(diff.RemovedNodes) != 1 {
 		t.Fatalf("RemovedNodes = %+v, want one removed node", diff.RemovedNodes)
@@ -76,7 +76,7 @@ func TestDiffGraphsChangedClass(t *testing.T) {
 	expected := testGraph(t, "expected", testNode{id: "node-a", name: "thing1", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM)})
 	actual := testGraph(t, "actual", testNode{id: "node-a2", name: "thing1", class: sliver.ClassComponent, typ: string(sliver.ComponentTypeGPU)})
 
-	diff := DiffGraphs(expected, actual)
+	diff := mustDiff(t, expected, actual)
 
 	if len(diff.ChangedNodes) != 1 || diff.ChangedNodes[0].ClassChanged == nil {
 		t.Fatalf("ChangedNodes = %+v, want class change", diff.ChangedNodes)
@@ -91,7 +91,7 @@ func TestDiffGraphsChangedMeaningfulProperty(t *testing.T) {
 	expected := testGraph(t, "expected", testNode{id: "node-a", name: "vm1", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM), props: map[string]string{sliver.PropSite: "RENC"}})
 	actual := testGraph(t, "actual", testNode{id: "node-a2", name: "vm1", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM), props: map[string]string{sliver.PropSite: "UKY"}})
 
-	diff := DiffGraphs(expected, actual)
+	diff := mustDiff(t, expected, actual)
 
 	if len(diff.ChangedNodes) != 1 || len(diff.ChangedNodes[0].PropertyChanges) != 1 {
 		t.Fatalf("ChangedNodes = %+v, want one property change", diff.ChangedNodes)
@@ -126,7 +126,7 @@ func TestDiffGraphsIgnoresUUIDAndRuntimeDifferences(t *testing.T) {
 		},
 	})
 
-	diff := DiffGraphs(expected, actual)
+	diff := mustDiff(t, expected, actual)
 
 	if !diff.Empty() {
 		t.Fatalf("diff = %+v, want runtime and UUID differences ignored", diff)
@@ -155,7 +155,7 @@ func TestDiffGraphsIgnoresAllocationOnlyDifferences(t *testing.T) {
 		},
 	})
 
-	diff := DiffGraphs(expected, actual)
+	diff := mustDiff(t, expected, actual)
 
 	if diff.HasUserIntentChanges() {
 		t.Fatalf("user-intent diff = %+v, want allocation-only differences ignored", diff.UserIntentDiagnostics())
@@ -169,7 +169,7 @@ func TestDiffGraphsClassifiesUserIntentDrift(t *testing.T) {
 	expected := testGraph(t, "expected", testNode{id: "node-a", name: "vm1", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM), props: map[string]string{sliver.PropLabels: `{"instance_parent":"renc-w1"}`}})
 	actual := testGraph(t, "actual", testNode{id: "node-a2", name: "vm1", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM), props: map[string]string{sliver.PropLabels: `{"instance_parent":"uky-w1"}`}})
 
-	diff := DiffGraphs(expected, actual)
+	diff := mustDiff(t, expected, actual)
 
 	classified := diff.ClassifiedDiagnostics()
 	if len(classified) != 1 {
@@ -196,7 +196,7 @@ func TestDiffGraphsEdgeDrift(t *testing.T) {
 		t.Fatalf("AddEdge actual: %v", err)
 	}
 
-	diff := DiffGraphs(expected, actual)
+	diff := mustDiff(t, expected, actual)
 
 	if len(diff.AddedEdges) != 1 || len(diff.RemovedEdges) != 0 {
 		t.Fatalf("edge diff = added %+v removed %+v, want one added edge", diff.AddedEdges, diff.RemovedEdges)
@@ -210,7 +210,7 @@ func TestDiffGraphsJSONNormalization(t *testing.T) {
 	expected := testGraph(t, "expected", testNode{id: "node-a", name: "vm1", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM), props: map[string]string{sliver.PropLabels: `{"b":"2","a":"1"}`}})
 	actual := testGraph(t, "actual", testNode{id: "node-a2", name: "vm1", class: sliver.ClassNetworkNode, typ: string(sliver.NodeTypeVM), props: map[string]string{sliver.PropLabels: `{"a":"1","b":"2"}`}})
 
-	diff := DiffGraphs(expected, actual)
+	diff := mustDiff(t, expected, actual)
 
 	if !diff.Empty() {
 		t.Fatalf("diff = %+v, want equivalent JSON ignored", diff)
@@ -252,8 +252,8 @@ func TestDiffGraphsDeterministicOrdering(t *testing.T) {
 		t.Fatalf("AddEdge actualB: %v", err)
 	}
 
-	diffA := DiffGraphs(expectedA, actualA)
-	diffB := DiffGraphs(expectedB, actualB)
+	diffA := mustDiff(t, expectedA, actualA)
+	diffB := mustDiff(t, expectedB, actualB)
 
 	if diffA.Summary() != diffB.Summary() {
 		t.Fatalf("Summary order changed: %q != %q", diffA.Summary(), diffB.Summary())
@@ -279,7 +279,7 @@ func TestDiffGraphMLMatchesDiffGraphs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DiffGraphML: %v", err)
 	}
-	fromGraphs := DiffGraphs(expected, actual)
+	fromGraphs := mustDiff(t, expected, actual)
 
 	if renderGraphDiff(fromGraphML) != renderGraphDiff(fromGraphs) {
 		t.Fatalf("DiffGraphML diff = %s, want %s", renderGraphDiff(fromGraphML), renderGraphDiff(fromGraphs))
@@ -410,4 +410,13 @@ func renderGraphDiff(diff GraphDiff) string {
 		b.WriteString(";")
 	}
 	return b.String()
+}
+
+func mustDiff(t *testing.T, expected, actual *graph.Graph) GraphDiff {
+	t.Helper()
+	diff, err := DiffGraphs(expected, actual)
+	if err != nil {
+		t.Fatalf("DiffGraphs: %v", err)
+	}
+	return diff
 }

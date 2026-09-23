@@ -52,13 +52,13 @@ func NormalizeGraph(g *graph.Graph) (*graph.Graph, error) {
 }
 
 // DiffGraphs compares expected and actual graphs by semantic topology intent.
-func DiffGraphs(expected, actual *graph.Graph) GraphDiff {
+func DiffGraphs(expected, actual *graph.Graph) (GraphDiff, error) {
 	return diff.DiffGraphs(expected, actual)
 }
 
 // DiffTopologies compares two topology objects without exposing graph internals
 // to callers such as Terraform providers.
-func DiffTopologies(expected, actual *Topology) TopologyDiff {
+func DiffTopologies(expected, actual *Topology) (TopologyDiff, error) {
 	var expectedGraph, actualGraph *graph.Graph
 	if expected != nil {
 		expectedGraph = expected.g
@@ -66,7 +66,11 @@ func DiffTopologies(expected, actual *Topology) TopologyDiff {
 	if actual != nil {
 		actualGraph = actual.g
 	}
-	return TopologyDiff{RawGraph: diff.DiffGraphs(expectedGraph, actualGraph)}
+	graphDiff, err := diff.DiffGraphs(expectedGraph, actualGraph)
+	if err != nil {
+		return TopologyDiff{}, err
+	}
+	return TopologyDiff{RawGraph: graphDiff}, nil
 }
 
 // DiffGraphML parses and compares two GraphML documents by semantic topology

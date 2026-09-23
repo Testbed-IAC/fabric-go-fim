@@ -58,7 +58,10 @@ func compareFixtureToGo(t *testing.T, fixtureName string, goTopo *Topology) {
 
 func assertGraphDiffEmpty(t *testing.T, expected, actual *Topology) {
 	t.Helper()
-	diff := DiffGraphs(expected.g, actual.g)
+	diff, err := DiffGraphs(expected.g, actual.g)
+	if err != nil {
+		t.Fatalf("DiffGraphs: %v", err)
+	}
 	if diff.Empty() {
 		return
 	}
