@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -21,7 +22,16 @@ var (
 	ErrBadRequest = errors.New("fabric client: bad request - GraphML or parameters rejected by orchestrator (400)")
 	// ErrServerError indicates an orchestrator 500 response.
 	ErrServerError = errors.New("fabric client: orchestrator internal server error (500)")
+	// ErrUnavailable indicates an orchestrator 429, 502, 503, or 504 response.
+	ErrUnavailable = errors.New("fabric client: orchestrator temporarily unavailable")
+	// ErrTransport indicates the request produced no HTTP response.
+	ErrTransport = errors.New("fabric client: request did not reach the orchestrator")
 )
+
+// IsTransient reports whether err is worth retrying.
+func IsTransient(err error) bool {
+	return errors.Is(err, ErrServerError) || errors.Is(err, ErrUnavailable) || errors.Is(err, ErrTransport)
+}
 
 func mapHTTPErr(httpResp *http.Response, err error) error {
 	if err == nil {
@@ -56,6 +66,8 @@ func mapHTTPErr(httpResp *http.Response, err error) error {
 		case http.StatusInternalServerError:
 			// 500s carry the orchestrator's traceback; keep enough to diagnose.
 			return fmt.Errorf("%w: %s", ErrServerError, truncate(detail, 4000))
+		case http.StatusTooManyRequests, http.StatusBadGateway, http.StatusServiceUnavailable, http.StatusGatewayTimeout:
+			return fmt.Errorf("%w (HTTP %d): %s", ErrUnavailable, httpResp.StatusCode, truncate(detail, 300))
 		default:
 			if httpResp.StatusCode >= 300 {
 				return fmt.Errorf("orchestrator returned HTTP %d: %s",
@@ -81,6 +93,9 @@ func mapHTTPErr(httpResp *http.Response, err error) error {
 			"is in between; a JSON shape the client does not know means the API "+
 			"schema drifted. Body: %s",
 			httpResp.StatusCode, contentType, bodyPart)
+	}
+	if httpResp == nil && !errors.Is(err, context.Canceled) && !errors.Is(err, context.DeadlineExceeded) {
+		return fmt.Errorf("%w: %w", ErrTransport, err)
 	}
 	return fmt.Errorf("orchestrator error: %w", err)
 }

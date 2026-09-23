@@ -175,3 +175,32 @@ func TestTruncate(t *testing.T) {
 		t.Fatalf("truncate = %q, want %q", got, want)
 	}
 }
+
+func TestMapHTTPErrUnavailableStatuses(t *testing.T) {
+	t.Parallel()
+	for _, code := range []int{http.StatusTooManyRequests, http.StatusBadGateway, http.StatusServiceUnavailable, http.StatusGatewayTimeout} {
+		err := mapHTTPErr(responseWithBody(code, "busy"), genericErr("http error"))
+		if !errors.Is(err, ErrUnavailable) || !IsTransient(err) {
+			t.Fatalf("status %d: err = %v, want ErrUnavailable and transient", code, err)
+		}
+	}
+}
+
+func TestIsTransientClassification(t *testing.T) {
+	t.Parallel()
+	transport := mapHTTPErr(nil, genericErr("dial tcp: connection refused"))
+	if !errors.Is(transport, ErrTransport) || !IsTransient(transport) {
+		t.Fatalf("err = %v, want ErrTransport and transient", transport)
+	}
+	if IsTransient(mapHTTPErr(nil, context.Canceled)) {
+		t.Fatal("context cancellation must not be transient")
+	}
+	if !IsTransient(mapHTTPErr(responseWithBody(http.StatusInternalServerError, "x"), genericErr("http error"))) {
+		t.Fatal("500 must be transient")
+	}
+	for _, code := range []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound, http.StatusBadRequest} {
+		if IsTransient(mapHTTPErr(responseWithBody(code, "x"), genericErr("http error"))) {
+			t.Fatalf("status %d must not be transient", code)
+		}
+	}
+}

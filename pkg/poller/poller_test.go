@@ -2,6 +2,7 @@ package poller
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -101,5 +102,62 @@ func TestWaitForPOA(t *testing.T) {
 				t.Fatalf("state = %q, want %q", got.State, tc.want)
 			}
 		})
+	}
+}
+
+func TestWaitForSliceRetriesTransientErrors(t *testing.T) {
+	t.Parallel()
+	transient := fmt.Errorf("%w: boom", client.ErrServerError)
+	cases := []struct {
+		name    string
+		steps   []error
+		wantErr bool
+	}{
+		{name: "recovers within budget", steps: []error{transient, transient, transient, nil}},
+		{name: "gives up after budget", steps: []error{transient, transient, transient, transient}, wantErr: true},
+		{name: "non-transient fails immediately", steps: []error{client.ErrForbidden, nil}, wantErr: true},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			calls := 0
+			c := &clienttest.Client{GetFn: func(context.Context, string) (*client.Slice, error) {
+				step := tc.steps[calls]
+				if calls < len(tc.steps)-1 {
+					calls++
+				}
+				if step != nil {
+					return nil, step
+				}
+				return &client.Slice{SliceID: "slice-1", State: "StableOK"}, nil
+			}}
+			_, err := WaitForSlice(context.Background(), c, "slice-1", []string{"StableOK"}, nil, time.Second, time.Millisecond)
+			if tc.wantErr && err == nil {
+				t.Fatal("expected error")
+			}
+			if !tc.wantErr && err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if tc.name == "non-transient fails immediately" && calls != 1 {
+				t.Fatalf("calls = %d, want 1", calls)
+			}
+		})
+	}
+}
+
+func TestWaitForPOARetriesTransientErrors(t *testing.T) {
+	t.Parallel()
+	calls := 0
+	c := &clienttest.Client{GetPOAFn: func(context.Context, string) (*client.POA, error) {
+		calls++
+		if calls == 1 {
+			return nil, fmt.Errorf("%w: down", client.ErrUnavailable)
+		}
+		return &client.POA{POAID: "poa-1", State: POASuccessState}, nil
+	}}
+	got, err := WaitForPOA(context.Background(), c, "poa-1", time.Second, time.Millisecond)
+	if err != nil || got.State != POASuccessState {
+		t.Fatalf("got %+v, %v", got, err)
 	}
 }
